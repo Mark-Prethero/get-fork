@@ -345,3 +345,12 @@ a.primary, a.ghost { display: inline-flex; align-items: center; justify-content:
 
 .hero .pitch-start { margin-right: 16px; }
 .hero .lede { max-width: 42ch; font-size: 17px; }
+.hero { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: start; padding: 40px 0 24px; gap: 40px; }
+.hero > div, .cursor-start { min-width: 0; }
+.hero .kicker { line-height: 1.6; max-width: 42ch; }
+.hero h1 { margin-top: 16px; font-size: clamp(34px, 3.8vw, 48px); line-height: 1.08; overflow-wrap: anywhere; }
+.hero .lede { margin-top: 20px; line-height: 1.6; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.hero-actions a { padding: 12px 18px; font-size: 14px; }
+@media (max-width: 900px) { .hero { grid-template-columns: 1fr; gap: 28px; } }
+@media (max-width: 640px) { .hero { padding-top: 28px; } .hero .kicker { font-size: 10px; } .hero h1 { font-size: 34px; } .hero-actions .primary { width: 100%; } }

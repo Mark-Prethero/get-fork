@@ -1,7 +1,7 @@
 import type { VariantId } from "@shared/brand.ts";
 import { flowSteps } from "./flow.ts";
 import { brand } from "@shared/brand.ts";
-import { esc, icon, mark, shell } from "./render.ts";
+import { esc, icon, shell } from "./render.ts";
 
 export const CURSOR_START_PROMPT = "/fork How should people find their next show? Compare browse, ask and a guided flow. Build working alternatives, give me the Fork preview and Grok Bot missions, then wait for my decision before adoption.";
 
@@ -25,12 +25,11 @@ export function gallery(config: Config): string {
   return shell("home", `
     <section class="hero">
       <div>
-        <div class="lockup">${mark("mark large")}<span class="word">${brand.wordmark}</span></div>
         <p class="kicker">For solo builders & small to medium teams</p>
         <h1>Explore the options.<br>Choose what ships.</h1>
         <p class="lede">Make product decisions inside your development workflow, even without a dedicated product team. Start with /fork in Cursor. Grok Bot explores the working options; you decide what Cursor builds next.</p>
-        <a class="primary pitch-start" href="/pitch" data-link>Start the one-minute pitch →</a>
-        <a class="ghost pitch-start" href="https://github.com/Mark-Prethero/get-fork#start-from-cursor" target="_blank" rel="noopener noreferrer">Use in Cursor ↗</a>
+        <div class="hero-actions"><a class="primary" href="/pitch" data-link>Start the one-minute pitch →</a>
+        <a class="ghost" href="https://github.com/Mark-Prethero/get-fork#start-from-cursor" target="_blank" rel="noopener noreferrer">Use in Cursor ↗</a></div>
       </div>
       <aside class="cursor-start"><p class="kicker">01 · Start in Cursor</p><h2>A product question.<br>One command.</h2><pre><code>/fork How should people find
 their next show?</code></pre><p>Open this repo in Cursor, type <strong>/fork</strong> in chat, then add your question.</p><div class="row"><button class="primary" type="button" data-copy-start>Copy Cursor prompt</button><a href="https://github.com/Mark-Prethero/get-fork/blob/main/.cursor/commands/fork.md" target="_blank" rel="noopener noreferrer">View the command ↗</a></div><p class="copy-start-status" role="status"></p></aside>
