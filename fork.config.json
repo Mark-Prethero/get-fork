@@ -1,0 +1,45 @@
+{
+  "id": "show-discovery-001",
+  "question": "How should someone choose a show: browse, ask, or guide?",
+  "variants": [
+    { "id": "browse", "name": "Browse", "path": "src/variants/browse" },
+    { "id": "ask", "name": "Ask", "path": "src/variants/ask" },
+    { "id": "guide", "name": "Guide", "path": "src/variants/guide" }
+  ],
+  "profiles": [
+    {
+      "id": "planner",
+      "name": "The Planner",
+      "missionId": "date-night",
+      "viewport": { "width": 1440, "height": 900 },
+      "textScale": 1.25,
+      "deviceMode": "desktop"
+    },
+    {
+      "id": "speedrunner",
+      "name": "The Speedrunner",
+      "missionId": "date-night",
+      "viewport": { "width": 390, "height": 844 },
+      "textScale": 1,
+      "deviceMode": "mobile-emulation"
+    },
+    {
+      "id": "organiser",
+      "name": "The Group Organiser",
+      "missionId": "group-night",
+      "viewport": { "width": 1280, "height": 800 },
+      "textScale": 1,
+      "deviceMode": "desktop",
+      "twistId": "budget-50"
+    }
+  ],
+  "runBudget": { "maxVariants": 4, "maxActions": 25, "maxDurationSeconds": 150, "maxChatTurns": 5 },
+  "requiredRuns": [
+    { "profileId": "planner", "variantId": "browse" },
+    { "profileId": "planner", "variantId": "ask" },
+    { "profileId": "planner", "variantId": "guide" },
+    { "profileId": "speedrunner", "variantId": "ask" }
+  ],
+  "evidenceLabel": "Agent walkthroughs · not real-user research",
+  "commercialScenario": null
+}

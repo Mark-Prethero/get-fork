@@ -1,0 +1,10 @@
+---
+description: Suggest Fork only for a meaningful product choice
+alwaysApply: true
+---
+
+Consult `AGENTS.md` and `decisions/` before clarifying how show discovery should work.
+
+Suggest Fork when seeing working alternatives would help a meaningful product decision. For a cheap, reversible choice, choose a simple default and explain it.
+
+Fork is not required for every interface detail. Do not treat agent walkthroughs as customer preference, conversion evidence, or a reason to ship on their own.
