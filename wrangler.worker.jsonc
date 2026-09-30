@@ -1,36 +1,41 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "get-fork",
+  "name": "get-fork-demo",
   "main": "src/worker.ts",
   "compatibility_date": "2026-09-30",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "assets": {
     "directory": "./dist/client",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": [
+      "/api/*"
+    ]
   },
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
   },
   "vars": {
-    "GROK_MODEL": "grok-4.7",
-    "PUBLIC_BASE_URL": "http://127.0.0.1:8787",
+    "GROK_MODEL": "grok-4.20-0309-non-reasoning",
+    "PUBLIC_BASE_URL": "https://get-fork-demo.proud-wood-517d.workers.dev",
     "ASK_CALL_BUDGET": "40"
   },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "fork",
-      "database_id": "00000000-0000-0000-0000-000000000001",
+      "database_name": "fork-demo",
+      "database_id": "5248c44f-1035-469f-be3a-aad10444591e",
       "migrations_dir": "migrations"
     }
   ],
-  "r2_buckets": [
+  "account_id": "718dee00a59bf7488ca530d0f80c465b",
+  "kv_namespaces": [
     {
       "binding": "EVIDENCE",
-      "bucket_name": "fork-evidence"
+      "id": "6c74f97f2a5641cabe88ed0ce0c494cf"
     }
   ]
 }

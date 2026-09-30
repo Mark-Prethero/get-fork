@@ -143,24 +143,25 @@ export async function appendEvent(
   db: D1Database,
   runId: string,
   input: { clientEventId: string; type: string; payload: unknown },
-): Promise<{ id: string; duplicate: boolean }> {
+): Promise<{ id: string; duplicate: boolean; budget?: boolean }> {
   const existing = await db
     .prepare("SELECT id FROM events WHERE run_id = ? AND client_event_id = ?")
     .bind(runId, input.clientEventId)
     .first<{ id: string }>();
   if (existing) return { id: existing.id, duplicate: true };
-  const count = await db
-    .prepare("SELECT COUNT(*) AS n FROM events WHERE run_id = ?")
-    .bind(runId)
-    .first<{ n: number }>();
   const id = crypto.randomUUID();
-  await db
+  const result = await db
     .prepare(
-      `INSERT INTO events (id, run_id, client_event_id, type, payload_json, recorded_at, sequence)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT OR IGNORE INTO events (id, run_id, client_event_id, type, payload_json, recorded_at, sequence)
+       SELECT ?, ?, ?, ?, ?, ?, (SELECT COUNT(*) + 1 FROM events WHERE run_id = ?)
+       WHERE (SELECT COUNT(*) FROM events WHERE run_id = ?) < ?`,
     )
-    .bind(id, runId, input.clientEventId, input.type, JSON.stringify(input.payload ?? {}), new Date().toISOString(), (count?.n ?? 0) + 1)
+    .bind(id, runId, input.clientEventId, input.type, JSON.stringify(input.payload ?? {}), new Date().toISOString(), runId, runId, forkConfig.runBudget.maxActions)
     .run();
+  if (!result.meta.changes) {
+    const duplicateId = await findEvent(db, runId, input.clientEventId);
+    return duplicateId ? { id: duplicateId, duplicate: true } : { id: "", duplicate: false, budget: true };
+  }
   return { id, duplicate: false };
 }
 

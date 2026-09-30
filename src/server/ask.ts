@@ -30,14 +30,16 @@ export interface AskFailure {
 const MAX_USER_MESSAGES = 5;
 const MAX_CHARS = 400;
 
-export function boundMessages(input: AskMessage[]): { messages: AskMessage[] } | { error: string } {
+export function boundMessages(input: unknown): { messages: AskMessage[] } | { error: string } {
   if (!Array.isArray(input) || input.length === 0) return { error: "A message is required." };
   const cleaned: AskMessage[] = [];
   for (const message of input.slice(-10)) {
+    if (!message || typeof message !== "object") return { error: "Each message must be an object." };
     if (message.role !== "user" && message.role !== "assistant") return { error: "Messages must be from the user or the assistant." };
     const content = String(message.content ?? "").trim();
     if (!content) continue;
-    if (content.length > MAX_CHARS) return { error: `Each message must be ${MAX_CHARS} characters or fewer.` };
+    const limit = message.role === "user" ? MAX_CHARS : 600;
+    if (content.length > limit) return { error: `Each ${message.role} message must be ${limit} characters or fewer.` };
     cleaned.push({ role: message.role, content });
   }
   const userCount = cleaned.filter((message) => message.role === "user").length;
@@ -50,7 +52,7 @@ export async function askCatalogue(
   env: { XAI_API_KEY?: string; GROK_MODEL?: string },
   messages: AskMessage[],
 ): Promise<AskSuccess | AskFailure> {
-  const model = env.GROK_MODEL || "grok-4.7";
+  const model = env.GROK_MODEL || "grok-4.20-0309-non-reasoning";
   const started = Date.now();
   if (!env.XAI_API_KEY) {
     return {
@@ -116,7 +118,7 @@ export async function askCatalogue(
       status: timedOut ? 504 : 502,
       code: timedOut ? "ask-timeout" : "ask-upstream",
       error: timedOut
-        ? "The reply did not arrive within eight seconds. You can try again."
+        ? "The reply did not arrive within twenty seconds. You can try again."
         : "The model did not answer. Nothing was substituted.",
       model,
       latencyMs: Date.now() - started,
@@ -127,13 +129,16 @@ export async function askCatalogue(
 async function callModel(apiKey: string, model: string, messages: Array<{ role: string; content: string }>): Promise<Response> {
   const url = "https://api.x.ai/v1/chat/completions";
   const headers = { authorization: `Bearer ${apiKey}`, "content-type": "application/json" };
+  const signal = AbortSignal.timeout(20000);
+  const reasoning = model.includes("non-reasoning") ? {} : { reasoning_effort: "low" };
   const withJson = await fetch(url, {
     method: "POST",
     headers,
-    signal: AbortSignal.timeout(8000),
+    signal,
     body: JSON.stringify({
       model,
       temperature: 0.2,
+      ...reasoning,
       messages,
       response_format: { type: "json_object" },
     }),
@@ -142,8 +147,8 @@ async function callModel(apiKey: string, model: string, messages: Array<{ role: 
   return fetch(url, {
     method: "POST",
     headers,
-    signal: AbortSignal.timeout(8000),
-    body: JSON.stringify({ model, temperature: 0.2, messages }),
+    signal,
+    body: JSON.stringify({ model, temperature: 0.2, ...reasoning, messages }),
   });
 }
 
@@ -160,7 +165,8 @@ function readContent(content: unknown): string {
 export function parseModelJson(text: string): { reply: string; showIds: string[] } | null {
   const trimmed = text.trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
   try {
-    const value = JSON.parse(trimmed) as { reply?: unknown; showIds?: unknown };
+    const value = JSON.parse(trimmed) as { reply?: unknown; showIds?: unknown } | null;
+    if (!value) return null;
     if (typeof value.reply !== "string" || !Array.isArray(value.showIds)) return null;
     const showIds = value.showIds.filter((id): id is string => typeof id === "string");
     return { reply: value.reply.slice(0, 600), showIds };

@@ -50,13 +50,16 @@ interface RunDetail {
   artifacts: Array<{ url: string | null; description: string; available: boolean; capturedAt: string }>;
 }
 
-export async function renderCompare(root: HTMLElement): Promise<void> {
+export async function renderCompare(root: HTMLElement): Promise<() => void> {
   const results = await api<Results>("/api/results");
+  if (root.dataset.page !== "/compare") return () => {};
   let selected = results.cells.find((cell) => cell.runId) ?? null;
   let detail: RunDetail | null = null;
   let shot = 0;
   let playing = false;
   let timer = 0;
+  let requestVersion = 0;
+  let disposed = false;
 
   const draw = () => {
     const core = results.profiles.filter((profile) => !profile.stretch);
@@ -125,10 +128,13 @@ export async function renderCompare(root: HTMLElement): Promise<void> {
   };
 
   async function loadDetail(): Promise<void> {
+    const version = ++requestVersion;
     detail = null;
-    if (selected?.runId && adminToken()) {
+    if (selected?.runId) {
       try {
-        detail = await api<RunDetail>(`/api/runs/${selected.runId}`, {}, adminToken());
+        const loaded = await api<RunDetail>(`/api/runs/${selected.runId}`, {}, adminToken());
+        if (disposed || version !== requestVersion) return;
+        detail = loaded;
       } catch {
         detail = null;
       }
@@ -137,6 +143,7 @@ export async function renderCompare(root: HTMLElement): Promise<void> {
   }
 
   function paintDetail(): void {
+    if (disposed || root.dataset.page !== "/compare") return;
     const host = root.querySelector("[data-detail]");
     if (!host || !selected) {
       if (host) host.innerHTML = `<p class="note">Select a cell to inspect a run.</p>`;
@@ -157,14 +164,14 @@ export async function renderCompare(root: HTMLElement): Promise<void> {
       <p>${selected.timingLabel ?? "Agent timing"}: ${selected.agentTimingSeconds === null || selected.agentTimingSeconds === undefined ? "Not captured." : `${selected.agentTimingSeconds}s`}</p>
       ${shots.length ? `<img class="shot" alt="${esc(current?.description ?? "Screenshot")}" src="${esc(current?.url ?? "")}" />` : `<p>Screenshot: Not captured.</p>`}
       <div class="replay">
-        <button class="ghost" type="button" data-play>${playing ? "Pause" : "Play"}</button>
-        <button class="ghost" type="button" data-restart>Restart</button>
+        <button class="ghost" type="button" data-play ${shots.length < 2 ? "disabled" : ""}>${playing ? "Pause" : "Play"}</button>
+        <button class="ghost" type="button" data-restart ${!shots.length ? "disabled" : ""}>Restart</button>
       </div>
       <p class="quiet">Screenshot replay. Playback does not change the run.</p>
       ${final?.evaluation ? final.evaluation.constraints.map((item) => `<div class="constraint"><span>${esc(item.label)} — ${esc(item.detail)}</span><span class="${item.pass ? "pass" : "fail"}">${item.pass ? "Pass" : "Fail"}</span></div>`).join("") : ""}
       ${(detail?.observations ?? []).map((item) => `<h3>Trace</h3><p>${esc(item.trace)}</p>${item.commentary.map((remark) => `<p><strong>Remark.</strong> ${esc(remark.text)}</p>`).join("")}`).join("")}
       <ol>${(detail?.events ?? []).map((event) => `<li>${esc(event.recordedAt)} · ${esc(event.type)}</li>`).join("")}</ol>
-      ${detail ? "" : `<p class="note">Open Runs and save the admin session to load the trace. The grid above stays available.</p>`}
+      ${detail ? "" : `<p class="note">This run is still active. Its trace is available to the operator until it finishes.</p>`}
     `;
     host.querySelector("[data-play]")?.addEventListener("click", () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -207,7 +214,7 @@ export async function renderCompare(root: HTMLElement): Promise<void> {
           runIds: results.cells.map((cell) => cell.runId).filter(Boolean),
         }),
       }, adminToken());
-      if (status) status.textContent = `Recorded ${saved.id}. Write it into the repo with: node scripts/fork.mjs record --action ${action}${action === "choose" ? ` --variant ${variant}` : ""} --reason "${reason.replaceAll('"', "")}"`;
+      if (status) status.textContent = `Recorded ${saved.id}. Save this same decision to your repo with: node scripts/fork.mjs record --decision ${saved.id}`;
     } catch (error) {
       if (status) status.textContent = error instanceof Error ? error.message : "Could not record the decision.";
     }
@@ -215,6 +222,7 @@ export async function renderCompare(root: HTMLElement): Promise<void> {
 
   draw();
   await loadDetail();
+  return () => { disposed = true; requestVersion += 1; stop(); };
 }
 
 function table(profiles: Results["profiles"], results: Results): string {
@@ -226,7 +234,7 @@ function table(profiles: Results["profiles"], results: Results): string {
     }).join("");
     return `<tr><th>${esc(profile.name)}<br><small>${esc(profile.deviceLabel)}</small></th>${cells}</tr>`;
   }).join("");
-  return `<table class="grid"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+  return `<div class="grid-scroll" tabindex="0" aria-label="Run comparison"><table class="grid"><thead>${head}</thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function cellButton(cell: Cell | undefined, profileId: string, variantId: string): string {

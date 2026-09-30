@@ -3,13 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "dev": "vite build && wrangler dev",
-    "check": "wrangler check",
+    "build": "vite build && node scripts/copy-evidence.mjs",
+    "dev": "npm run build && wrangler dev -c wrangler.worker.jsonc",
+    "check": "npm run typecheck && npm test && npm run build && wrangler deploy --dry-run -c wrangler.worker.jsonc",
     "typecheck": "tsc -p tsconfig.worker.json && tsc -p tsconfig.client.json",
-    "test": "node --experimental-strip-types --test src/shared/*.test.ts",
-    "setup": "wrangler d1 migrations apply fork --local",
-    "deploy": "npm run build && wrangler deploy"
+    "test": "node --experimental-strip-types --test src/shared/*.test.ts src/server/*.test.ts",
+    "setup": "wrangler d1 migrations apply fork-demo --local -c wrangler.worker.jsonc",
+    "deploy": "npm run build && wrangler deploy -c wrangler.worker.jsonc"
   },
   "dependencies": {
     "hono": "^4.9.8"

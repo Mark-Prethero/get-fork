@@ -88,12 +88,14 @@ function mountAsk(root: HTMLElement, ctx: ExploreContext, paint: (body: string) 
   const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
   let cards: Show[] = [];
   let status = "Describe the evening in your own words.";
+  let sending = false;
+  let draft = "";
   const draw = () => {
     paint(`
       <div class="thread">${messages.map((message) => `<div class="bubble ${message.role}">${esc(message.content)}</div>`).join("")}</div>
       <form class="composer">
-        <textarea name="message" aria-label="Your request" maxlength="400" placeholder="A funny show tonight, for a date, under £80."></textarea>
-        <button class="primary" type="button" data-send>Send</button>
+        <textarea name="message" aria-label="Your request" maxlength="400" ${sending ? "disabled" : ""} placeholder="A funny show tonight, for a date, under £80.">${esc(draft)}</textarea>
+        <button class="primary" type="button" data-send ${sending ? "disabled" : ""}>${sending ? "Searching…" : "Send"}</button>
       </form>
       <p class="note" data-status>${esc(status)}</p>
       <div class="shows">${cards.map(showCard).join("")}</div>
@@ -113,6 +115,9 @@ function mountAsk(root: HTMLElement, ctx: ExploreContext, paint: (body: string) 
     bindChoose(root, ctx);
   };
   async function send(message: string): Promise<void> {
+    if (sending) return;
+    sending = true;
+    draft = "";
     messages.push({ role: "user", content: message });
     status = "Looking through the catalogue…";
     cards = [];
@@ -135,9 +140,12 @@ function mountAsk(root: HTMLElement, ctx: ExploreContext, paint: (body: string) 
       if (result.rejectedIds.length) status += ` Rejected unknown ids: ${result.rejectedIds.join(", ")}.`;
       ctx.onEvent?.("chat", { role: "assistant", showIds: result.shows.map((show) => show.id), rejectedIds: result.rejectedIds, latencyMs: result.latencyMs });
     } catch (error) {
+      draft = message;
+      messages.pop();
       status = error instanceof Error ? error.message : "Ask did not answer.";
       ctx.onEvent?.("ask_error", { message: status });
     }
+    sending = false;
     draw();
   }
   draw();

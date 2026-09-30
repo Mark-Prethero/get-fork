@@ -40,7 +40,14 @@ interface FullRun extends Card {
 
 export async function renderRun(root: HTMLElement, runId: string): Promise<void> {
   const card = await api<Card>(`/api/runs/${runId}/card`);
+  if (root.dataset.page !== `/run/${runId}`) return;
   const token = runToken(runId);
+  if (!token && ["completed", "blocked", "timed_out", "error", "unsupported"].includes(card.status)) {
+    const recorded = await api<FullRun>(`/api/runs/${runId}`);
+    if (root.dataset.page !== `/run/${runId}`) return;
+    root.innerHTML = shell("", missionCard(recorded, receipt(recorded)));
+    return;
+  }
   if (!token) {
     root.innerHTML = shell("", missionCard(card, `
       <form class="form" data-token-form>
@@ -67,6 +74,7 @@ export async function renderRun(root: HTMLElement, runId: string): Promise<void>
     root.innerHTML = shell("", `<p class="note">${esc(error instanceof Error ? error.message : "Could not open the run.")}</p>`);
     return;
   }
+  if (root.dataset.page !== `/run/${runId}`) return;
   if (full.outcome?.final || ["completed", "blocked", "timed_out", "error", "unsupported"].includes(full.status)) {
     root.innerHTML = shell("", missionCard(full, `${receipt(full)}${traceFields(false)}`));
     bindTrace(root, full.id, token, false);
@@ -75,11 +83,11 @@ export async function renderRun(root: HTMLElement, runId: string): Promise<void>
   if (full.status === "queued") {
     root.innerHTML = shell("", missionCard(full, `<button class="primary" type="button" data-start>Start</button>`));
     root.querySelector("[data-start]")?.addEventListener("click", () => {
-      void start(root, full, token);
+      void start(root, full, token).catch((error) => showError(root, error));
     });
     return;
   }
-  drawVariant(root, full, token, false);
+  drawVariant(root, full, token, Boolean(full.outcome?.provisional));
 }
 
 async function start(root: HTMLElement, card: FullRun, token: string): Promise<void> {
@@ -87,7 +95,7 @@ async function start(root: HTMLElement, card: FullRun, token: string): Promise<v
   await api(`/api/runs/${card.id}/start`, { method: "POST", body: JSON.stringify({ device }) }, token);
   await track(card.id, token, "start", device);
   const full = await api<FullRun>(`/api/runs/${card.id}`, {}, token);
-  drawVariant(root, full, token, false);
+  drawVariant(root, full, token, Boolean(full.outcome?.provisional));
 }
 
 function drawVariant(root: HTMLElement, card: FullRun, token: string, twistMode: boolean): void {
@@ -99,6 +107,7 @@ function drawVariant(root: HTMLElement, card: FullRun, token: string, twistMode:
     ${traceFields(true)}
   `);
   void configPromise.then((config) => {
+    if (root.dataset.page !== `/run/${card.id}`) return;
     const host = root.querySelector<HTMLElement>("[data-variant]");
     if (!host) return;
     mountExplore(host, {
@@ -109,9 +118,9 @@ function drawVariant(root: HTMLElement, card: FullRun, token: string, twistMode:
       token,
       textScale: card.textScale,
       onEvent: (type, payload) => void track(card.id, token, type, payload),
-      onChoose: (showId) => void choose(root, card, token, showId, twistMode),
+      onChoose: (showId) => void choose(root, card, token, showId, twistMode).catch((error) => showError(root, error)),
     }, true);
-  });
+  }).catch((error) => showError(root, error));
   bindTrace(root, card.id, token, true);
 }
 
@@ -160,13 +169,14 @@ function bindTrace(root: HTMLElement, runId: string, token: string, open: boolea
   const finishAs = (outcome: "blocked" | "error") => {
     const reason = root.querySelector<HTMLTextAreaElement>("#trace")?.value.trim() || "Stopped before a choice.";
     void api(`/api/runs/${runId}/finish`, { method: "POST", body: JSON.stringify({ outcome, reason }) }, token)
-      .then(() => renderRun(root, runId));
+      .then(() => renderRun(root, runId)).catch((error) => showError(root, error));
   };
   root.querySelector("[data-block]")?.addEventListener("click", () => finishAs("blocked"));
   root.querySelector("[data-error]")?.addEventListener("click", () => finishAs("error"));
 }
 
 async function choose(root: HTMLElement, card: FullRun, token: string, showId: string, twistMode: boolean): Promise<void> {
+  await track(card.id, token, "choice_receipt", { showId });
   if (card.twist && !twistMode) {
     await api(`/api/runs/${card.id}/finish`, { method: "POST", body: JSON.stringify({ outcome: "selected", showId, stage: "provisional" }) }, token);
     await track(card.id, token, "twist", { showId });
@@ -236,4 +246,11 @@ function track(runId: string, token: string, type: string, payload: unknown): Pr
     method: "POST",
     body: JSON.stringify({ clientEventId: crypto.randomUUID(), type, payload }),
   }, token).then(() => undefined).catch(() => undefined);
+}
+
+function showError(root: HTMLElement, error: unknown): void {
+  const status = root.querySelector("[data-report-status]") ?? root.querySelector(".mission");
+  const line = document.createElement("p"); line.className = "note";
+  line.textContent = error instanceof Error ? error.message : "The request failed. Please retry.";
+  status?.appendChild(line);
 }

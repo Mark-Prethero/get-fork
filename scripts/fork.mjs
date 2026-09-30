@@ -70,6 +70,9 @@ async function exportEvidence() {
       variantId: cell.variantId,
       status: run.status,
       buildId: run.buildId,
+      snapshot: run.snapshot,
+      startedAt: run.startedAt,
+      finishedAt: run.finishedAt,
       device: run.device,
       outcome: run.outcome,
       events: run.events,
@@ -90,7 +93,7 @@ async function exportEvidence() {
       const extension = artifact.contentType === "image/png" ? "png" : artifact.contentType === "image/webp" ? "webp" : "jpg";
       const file = `${artifact.id}.${extension}`;
       await writeFile(join(dir, file), bytes);
-      manifest.artifacts.push({ id: artifact.id, description: artifact.description, file, missing: false });
+      manifest.artifacts.push({ id: artifact.id, description: artifact.description, capturedAt: artifact.capturedAt, file, missing: false });
     }
     await writeFile(join(dir, "manifest.json"), JSON.stringify(manifest, null, 2));
     const trace = (run.observations ?? []).map((item) => item.trace).join("\n\n") || "Not captured.";
@@ -100,26 +103,24 @@ async function exportEvidence() {
 }
 
 async function record() {
-  const action = flag("action");
-  const reason = flag("reason");
-  const variant = flag("variant");
-  if (!action || !reason || !["choose", "revise", "defer"].includes(action)) {
-    throw new Error("record needs --action choose|revise|defer and --reason.");
+  let action = flag("action");
+  let reason = flag("reason");
+  let variant = flag("variant");
+  let saved;
+  if (flag("decision")) {
+    saved = await request(`/api/decisions/${encodeURIComponent(flag("decision"))}`);
+    action = saved.action; reason = saved.rationale; variant = saved.variantId;
+  } else {
+    if (!action || !reason || !["choose", "revise", "defer"].includes(action)) throw new Error("record needs --decision ID, or --action choose|revise|defer and --reason.");
+    if (action === "choose" && !variant) throw new Error("choose needs --variant.");
+    const current = await request("/api/results");
+    const created = await request("/api/decisions", { method: "POST", admin: true,
+      body: JSON.stringify({ action, variantId: variant, rationale: reason, runIds: current.cells.map((cell) => cell.runId).filter(Boolean) }) });
+    saved = await request(`/api/decisions/${created.id}`);
   }
-  if (action === "choose" && !variant) throw new Error("choose needs --variant.");
-  const results = await request("/api/results");
-  const saved = await request("/api/decisions", {
-    method: "POST",
-    admin: true,
-    body: JSON.stringify({
-      action,
-      variantId: variant,
-      rationale: reason,
-      runIds: results.cells.map((cell) => cell.runId).filter(Boolean),
-    }),
-  });
+  const results = saved.snapshot;
   const id = saved.id;
-  const date = new Date().toISOString().slice(0, 10);
+  const date = saved.createdAt.slice(0, 10);
   const lines = [
     "---",
     `id: ${id}`,
@@ -174,6 +175,7 @@ async function adopt() {
   const dirty = execFileSync("git", ["status", "--porcelain", "--", "src/config/show-search.ts"], { cwd: root, encoding: "utf8" }).trim();
   if (dirty) throw new Error("src/config/show-search.ts has uncommitted edits. Adopt left it untouched.");
   const adoptedAt = new Date().toISOString();
+  await request("/api/adopt", { method: "POST", admin: true, body: JSON.stringify({ variantId: variant, decisionId: decision }) });
   await writeFile(target, `/**
  * Fork adoption target for show discovery.
  * \`fork adopt\` is the only writer.
@@ -185,9 +187,6 @@ export const showSearch = {
 };
 // adopted ${adoptedAt}
 `);
-  await request("/api/adopt", { method: "POST", admin: true, body: JSON.stringify({ variantId: variant, decisionId: decision }) }).catch((error) => {
-    console.log(`File updated. The running app was not updated: ${error.message}`);
-  });
   await updateAgents("choose", variant, decision, true);
   console.log(`Adopted ${variant} from ${decision}.`);
   if (args.includes("--commit")) {

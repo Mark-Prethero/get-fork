@@ -1,4 +1,4 @@
-import { api, adminToken } from "./api.ts";
+import { api, adminToken, saveRunToken } from "./api.ts";
 import { esc, shell } from "./render.ts";
 
 interface QueueItem {
@@ -20,6 +20,7 @@ export async function renderAdmin(root: HTMLElement): Promise<void> {
     </form>
     <div class="row" style="margin-top:16px">
       <button class="ghost" type="button" data-queue>Queue the four required runs</button>
+      <button class="ghost" type="button" data-queue data-retry="true">Retry unsuccessful required runs</button>
       <button class="ghost" type="button" data-explain>Request synthesis</button>
     </div>
     <p class="note" data-status></p>
@@ -32,10 +33,11 @@ export async function renderAdmin(root: HTMLElement): Promise<void> {
     if (value) sessionStorage.setItem("fork.admin", value);
     if (status) status.textContent = "Admin session saved in this tab.";
   });
-  root.querySelector("[data-queue]")?.addEventListener("click", () => {
-    void api<{ runs: QueueItem[] }>("/api/queue", { method: "POST", body: "{}" }, adminToken()).then((result) => {
+  root.querySelectorAll<HTMLButtonElement>("[data-queue]").forEach((button) => button.addEventListener("click", () => {
+    void api<{ runs: QueueItem[] }>("/api/queue", { method: "POST", body: JSON.stringify({ retryErrors: button.dataset.retry === "true" }) }, adminToken()).then((result) => {
       const host = root.querySelector("[data-prompts]");
       if (!host) return;
+      for (const item of result.runs) if (item.token) saveRunToken(item.run.id, item.token);
       host.innerHTML = result.runs.map((item) => `
         <article class="mission">
           <h3>${esc(item.run.profileName)} · ${esc(item.run.variantName)}</h3>
@@ -47,7 +49,7 @@ export async function renderAdmin(root: HTMLElement): Promise<void> {
     }).catch((error: unknown) => {
       if (status) status.textContent = error instanceof Error ? error.message : "Could not queue runs.";
     });
-  });
+  }));
   root.querySelector("[data-explain]")?.addEventListener("click", () => {
     void api<{ ok: boolean; text?: string; error?: string }>("/api/explain", { method: "POST", body: "{}" }, adminToken()).then((result) => {
       if (status) status.textContent = result.ok ? result.text ?? "" : result.error ?? "Synthesis unavailable.";

@@ -19,6 +19,7 @@ html, body { margin: 0; min-height: 100%; background: var(--paper); }
 body { color: var(--ink); }
 button, input, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
+button:disabled { cursor: default; opacity: .55; }
 a { color: inherit; }
 
 .shell { max-width: 1120px; margin: 0 auto; padding: 28px 32px 64px; }
@@ -90,6 +91,10 @@ input[type="text"], input[type="password"], input[type="file"] { width: 100%; mi
 .constraint { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .pass, .fail { font-weight: 600; }
 .grid { width: 100%; border-collapse: collapse; margin-top: 22px; }
+.grid-scroll { overflow-x: auto; max-width: 100%; }
+.grid-scroll .grid { min-width: 600px; }
+.show, .option, .bubble, .mission { min-width: 0; overflow-wrap: anywhere; }
+.top { flex-wrap: wrap; }
 .grid th, .grid td { border: 1px solid var(--line); vertical-align: top; text-align: left; padding: 12px; }
 .grid th { font-weight: 600; }
 .cell { width: 100%; min-height: 132px; border: 0; background: transparent; text-align: left; padding: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -116,3 +121,6 @@ summary { cursor: pointer; min-height: 48px; display: flex; align-items: center;
 }
 
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.frame.mobile .shows { grid-template-columns: 1fr; }
+.frame.mobile .composer { flex-wrap: wrap; }

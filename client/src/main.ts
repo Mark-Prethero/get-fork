@@ -4,21 +4,30 @@ import { renderAdmin } from "./admin.ts";
 import { renderCompare } from "./compare.ts";
 import { mountExplore } from "./explore.ts";
 import { gallery } from "./gallery.ts";
-import { bindLinks } from "./render.ts";
+import { esc } from "./render.ts";
 import { renderRun } from "./run.ts";
 import type { Show } from "@shared/shows.ts";
 
 const root = document.querySelector<HTMLElement>("#app");
+let renderVersion = 0;
+let dispose: (() => void) | undefined;
 
 async function render(): Promise<void> {
   if (!root) return;
+  const version = ++renderVersion;
+  dispose?.();
+  dispose = undefined;
   const path = location.pathname.replace(/\/$/, "") || "/";
+  root.dataset.page = path;
   try {
     if (path === "/") {
       const config = await api<{ question: string; evidenceLabel: string; adopted: { variantId: string } | null }>("/api/config");
+      if (version !== renderVersion) return;
       root.innerHTML = gallery(config);
     } else if (path === "/compare") {
-      await renderCompare(root);
+      const cleanup = await renderCompare(root);
+      if (version !== renderVersion) cleanup();
+      else dispose = cleanup;
     } else if (path === "/admin") {
       await renderAdmin(root);
     } else if (path.startsWith("/run/")) {
@@ -29,23 +38,22 @@ async function render(): Promise<void> {
         root.innerHTML = "<p class=\"shell\">That approach is not in this build.</p>";
       } else {
         const config = await api<{ shows: Show[]; evidenceLabel: string }>("/api/config");
+        if (version !== renderVersion) return;
         mountExplore(root, { variantId, shows: config.shows, evidenceLabel: config.evidenceLabel });
       }
     } else {
       root.innerHTML = "<p class=\"shell\">This page is not part of Fork.</p>";
     }
   } catch (error) {
-    root.innerHTML = `<p class="shell">${error instanceof Error ? error.message : "The page could not load."}</p>`;
+    if (version !== renderVersion) return;
+    root.innerHTML = `<p class="shell">${esc(error instanceof Error ? error.message : "The page could not load.")}</p>`;
   }
-  bindLinks(root, (next) => {
-    history.pushState({}, "", next);
-    void render();
-  });
 }
 
 document.addEventListener("click", (event) => {
   const link = (event.target as Element | null)?.closest?.("a[data-link]");
   if (!(link instanceof HTMLAnchorElement)) return;
+  if (event.button !== 0 || link.origin !== location.origin) return;
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   event.preventDefault();
   history.pushState({}, "", link.pathname);

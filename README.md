@@ -29,3 +29,36 @@ node scripts/fork.mjs adopt --variant guide --decision <id>
 ## Evidence
 
 Agent walkthroughs are not real-user research. Comparison cells that were not run stay labelled “Not run”. Mobile frames are labelled “Mobile emulation”.
+
+## Live demo and deployment
+
+Landing: https://get-fork.pages.dev/
+
+App and evidence: https://get-fork-demo.proud-wood-517d.workers.dev/
+
+Both use Northbound Studio account `718dee00a59bf7488ca530d0f80c465b`. Pages deploys `landing/` from `main`. The Worker uses `wrangler.worker.jsonc` explicitly, so the Pages build does not ingest the app's Worker configuration.
+
+```bash
+npm ci
+npm run check
+npx wrangler d1 migrations apply fork-demo --remote -c wrangler.worker.jsonc
+npm run deploy
+```
+
+Configure server secrets with `wrangler secret put XAI_API_KEY -c wrangler.worker.jsonc` (and ADMIN_KEY, BOT_INGEST_KEY). Never commit `.dev.vars`. Worker binding types are generated with `wrangler types src/worker-bindings.d.ts -c wrangler.worker.jsonc --include-runtime=false --strict-vars=false --env-interface=WorkerBindings`.
+
+D1 holds runs, immutable decision snapshots and model-call reservations. Workers KV holds new screenshot uploads; the original six captured screenshots ship as static assets. Original exports retain build `2026-09-30.1`; the snapshot fields were reconstructed from that build's committed source, and uncaptured finish/capture timestamps are not inferred.
+
+Ask uses the verified available `grok-4.20-0309-non-reasoning` model. The shared upstream timeout is twenty seconds: the original eight-second limit consistently expired before valid responses arrived. Upstream attempts are reserved before fetch and consume the configured 40-call demo budget even on failure. Ask failure is visible; no recommendations are substituted.
+
+Retry unsuccessful required runs from Runs after saving an admin session. These are new attempts linked to the original run; they never overwrite historical outcomes. New runs are queued until the operator hands their mission to Grok Bot.
+
+A decision recorded in the browser can be exported without creating a duplicate:
+
+```bash
+PUBLIC_BASE_URL=https://get-fork-demo.proud-wood-517d.workers.dev node scripts/fork.mjs record --decision <id>
+```
+
+The export uses the decision's saved evidence snapshot. Adoption must succeed on the server before the CLI writes the repo target; the app highlights the adopted option and reads the committed default after redeployment.
+
+Reviewed and completed by Mark Prethero via Codex on Mark MacBook.

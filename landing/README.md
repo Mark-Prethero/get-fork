@@ -1,10 +1,10 @@
 # Fork landing preview
 
-`index.html` is the supplied standalone Fork landing page. Its images and styles are embedded, so no build step is required. This folder is independent of the hackathon app on the Cursor branch.
+`index.html` is the supplied standalone Fork landing page. Its images and styles are embedded, so no build step is required. This folder is independent of the hackathon Worker app.
 
 ## Cloudflare Pages
 
-Connect `Mark-Prethero/get-fork` to a Pages project in the tickadoo account:
+Connect `Mark-Prethero/get-fork` to a Pages project in the Northbound Studio account:
 
 - Production branch: `main`
 - Framework preset: None
@@ -16,7 +16,7 @@ Changes to this folder on `main` update the hosted page. Other branches can rece
 
 ## Link the app
 
-When the hackathon app has a public URL, set `window.FORK_DEMO_URL` in `index.html` to that HTTPS URL. Until then, the demo button opens the built-in walkthrough. The decision download remains an illustrative example.
+The live app is https://get-fork-demo.proud-wood-517d.workers.dev/. To change it, set `window.FORK_DEMO_URL` in `index.html` to that HTTPS URL. Until then, the demo button opens the built-in walkthrough. The decision download remains an illustrative example.
 
 ## Local preview
 

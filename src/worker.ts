@@ -1,4 +1,6 @@
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
+import { showSearch } from "./config/show-search.ts";
 import { bearer, isAdmin, isBot, newToken } from "./server/auth.ts";
 import { askCatalogue, boundMessages, type AskMessage } from "./server/ask.ts";
 import {
@@ -32,19 +34,11 @@ import { fallbackDeviceLabel } from "./shared/device.ts";
 import { shows } from "./shared/shows.ts";
 import type { DecisionAction } from "./shared/types.ts";
 
-interface Env {
-  DB: D1Database;
-  EVIDENCE: R2Bucket;
-  ASSETS: Fetcher;
-  GROK_MODEL: string;
-  PUBLIC_BASE_URL: string;
-  ASK_CALL_BUDGET: string;
-  XAI_API_KEY?: string;
-  ADMIN_KEY?: string;
-  BOT_INGEST_KEY?: string;
-}
+type Env = WorkerBindings;
 
 const app = new Hono<{ Bindings: Env }>();
+
+app.use("/api/*", bodyLimit({ maxSize: 5_100_000, onError: (c) => c.json({ error: "Request is too large." }, 413) }));
 
 app.use("/api/*", async (c, next) => {
   const problems = validateConfig(forkConfig);
@@ -69,7 +63,7 @@ app.get("/api/config", async (c) => {
     assumptions: Object.fromEntries(forkConfig.variants.map((variant) => [variant.id, assumptionFor(variant.id)])),
     shows,
     askAvailable: Boolean(c.env.XAI_API_KEY),
-    model: c.env.GROK_MODEL || "grok-4.7",
+    model: c.env.GROK_MODEL || "grok-4.20-0309-non-reasoning",
     adopted,
   });
 });
@@ -86,7 +80,7 @@ app.post("/api/runs", async (c) => {
       variantId: body.variantId,
       profileId: body.profileId,
       parentRunId: body.parentRunId,
-      model: c.env.GROK_MODEL || "grok-4.7",
+      model: c.env.GROK_MODEL || "grok-4.20-0309-non-reasoning",
       token,
     });
     return c.json({ run: publicRun(row), token, prompt: dispatchPrompt(c.env, row, token) });
@@ -97,18 +91,20 @@ app.post("/api/runs", async (c) => {
 
 app.post("/api/queue", async (c) => {
   if (!(await isAdmin(c.req.raw, c.env.ADMIN_KEY))) return c.json({ error: "Admin authentication is required." }, 401);
+  const body = await readJson<{ retryErrors?: boolean }>(c);
   const existing = await listRuns(c.env.DB);
   const created = [];
   for (const required of forkConfig.requiredRuns) {
-    const found = existing.find((run) => run.profile_id === required.profileId && run.variant_id === required.variantId);
-    if (found) {
+    const found = existing.filter((run) => run.profile_id === required.profileId && run.variant_id === required.variantId).at(-1);
+    if (found && !(body?.retryErrors === true && ["error", "blocked", "timed_out"].includes(found.status))) {
       created.push({ run: publicRun(found), token: null, prompt: null, existing: true });
       continue;
     }
     const token = newToken();
     const row = await createRun(c.env.DB, forkConfig, {
       ...required,
-      model: c.env.GROK_MODEL || "grok-4.7",
+      parentRunId: found?.id ?? null,
+      model: c.env.GROK_MODEL || "grok-4.20-0309-non-reasoning",
       token,
     });
     created.push({ run: publicRun(row), token, prompt: dispatchPrompt(c.env, row, token), existing: false });
@@ -125,7 +121,7 @@ app.get("/api/runs/:id/card", async (c) => {
 app.get("/api/runs/:id", async (c) => {
   const row = await getRun(c.env.DB, c.req.param("id"));
   if (!row) return c.json({ error: "Run not found." }, 404);
-  if (!(await canReadRun(c, row))) return c.json({ error: "Run authentication is required." }, 401);
+  if (!isTerminal(row.status) && !(await canReadRun(c, row))) return c.json({ error: "Run authentication is required." }, 401);
   return c.json(await fullRun(c.env.DB, row));
 });
 
@@ -145,7 +141,7 @@ app.post("/api/runs/:id/events", async (c) => {
   if (!(await tokenMatches(row, bearer(c.req.raw)))) return c.json({ error: "Run authentication is required." }, 401);
   if (isTerminal(row.status)) return c.json({ error: "This run is already finished." }, 409);
   const body = await readJson<{ clientEventId?: string; type?: string; payload?: unknown }>(c);
-  if (!body?.clientEventId || !body.type) return c.json({ error: "clientEventId and type are required." }, 400);
+  if (typeof body?.clientEventId !== "string" || typeof body.type !== "string" || !body.clientEventId || !body.type) return c.json({ error: "clientEventId and type are required." }, 400);
   if (body.clientEventId.length > 80 || body.type.length > 40) return c.json({ error: "Event fields are too long." }, 400);
   const payload = JSON.stringify(body.payload ?? {});
   if (payload.length > 4000) return c.json({ error: "Event payload is too large." }, 400);
@@ -156,6 +152,7 @@ app.post("/api/runs/:id/events", async (c) => {
     return c.json({ error: "This run has reached its action budget.", code: "budget" }, 409);
   }
   const saved = await appendEvent(c.env.DB, row.id, { clientEventId: body.clientEventId, type: body.type, payload: body.payload });
+  if (saved.budget) return c.json({ error: "This run has reached its action budget.", code: "budget" }, 409);
   return c.json({ ok: true, id: saved.id, duplicate: saved.duplicate });
 });
 
@@ -166,8 +163,9 @@ app.post("/api/runs/:id/observations", async (c) => {
   const body = await readJson<{ trace?: string; commentary?: Array<{ text?: string; eventId?: string }> }>(c);
   const trace = String(body?.trace ?? "").trim().slice(0, 4000);
   if (!trace) return c.json({ error: "A factual trace is required." }, 400);
-  const commentary = (body?.commentary ?? [])
+  const commentary = (Array.isArray(body?.commentary) ? body.commentary : [])
     .slice(0, 2)
+    .filter((item) => item && typeof item === "object")
     .map((item) => ({ text: String(item.text ?? "").slice(0, 240), eventId: item.eventId ? String(item.eventId).slice(0, 80) : null }))
     .filter((item) => item.text);
   const id = await addObservation(c.env.DB, row.id, { trace, commentary });
@@ -179,7 +177,11 @@ app.post("/api/runs/:id/finish", async (c) => {
   if (!row) return c.json({ error: "Run not found." }, 404);
   if (!(await tokenMatches(row, bearer(c.req.raw)))) return c.json({ error: "Run authentication is required." }, 401);
   const body = await readJson<{ outcome?: "selected" | "blocked" | "timeout" | "error"; showId?: string; stage?: "provisional" | "final"; reason?: string }>(c);
-  if (!body?.outcome) return c.json({ error: "outcome is required." }, 400);
+  if (!body?.outcome || !["selected", "blocked", "timeout", "error"].includes(body.outcome ?? "")) return c.json({ error: "Invalid outcome." }, 400);
+  if (body.stage && !["provisional", "final"].includes(body.stage)) return c.json({ error: "Invalid stage." }, 400);
+  if (body.reason !== undefined && typeof body.reason !== "string") return c.json({ error: "Invalid reason." }, 400);
+  if (row.status === "queued") return c.json({ error: "Start the run before finishing it." }, 409);
+  if (body.outcome === "selected" && !snapshotOf(row).catalogue.some((show) => show.id === body.showId)) return c.json({ error: "Unknown show." }, 400);
   const next = await finishRun(c.env.DB, row, {
     outcome: body.outcome,
     showId: body.showId,
@@ -206,7 +208,7 @@ app.post("/api/runs/:id/artifacts", async (c) => {
   if (existing.length >= 12) return c.json({ error: "This run already has 12 artifacts." }, 409);
   const id = crypto.randomUUID();
   const key = `runs/${row.id}/${id}`;
-  await c.env.EVIDENCE.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type } });
+  await c.env.EVIDENCE.put(key, await file.arrayBuffer(), { metadata: { contentType: file.type } });
   await addArtifact(c.env.DB, {
     runId: row.id,
     type,
@@ -223,9 +225,12 @@ app.post("/api/runs/:id/artifacts", async (c) => {
 app.get("/api/artifacts/:id", async (c) => {
   const row = await getArtifact(c.env.DB, c.req.param("id"));
   if (!row || row.available !== 1) return c.json({ error: "Artifact not captured." }, 404);
-  const object = await c.env.EVIDENCE.get(row.storage_reference);
+  if (row.storage_reference.startsWith("asset:")) {
+    return c.env.ASSETS.fetch(new Request(new URL(row.storage_reference.slice(6), c.req.url)));
+  }
+  const object = await c.env.EVIDENCE.get(row.storage_reference, "arrayBuffer");
   if (!object) return c.json({ error: "Artifact not captured." }, 404);
-  return new Response(object.body, {
+  return new Response(object, {
     headers: {
       "content-type": row.content_type ?? "application/octet-stream",
       "cache-control": "public, max-age=3600",
@@ -237,42 +242,22 @@ app.post("/api/ask", async (c) => {
   const body = await readJson<{ messages?: AskMessage[]; runId?: string }>(c);
   const bounded = boundMessages(body?.messages ?? []);
   if ("error" in bounded) return c.json({ error: bounded.error }, 400);
-  const budget = Number(c.env.ASK_CALL_BUDGET || "40");
-  const used = await c.env.DB.prepare("SELECT COUNT(*) AS n FROM chat_calls WHERE status = 'ok'").first<{ n: number }>();
-  if ((used?.n ?? 0) >= budget) {
-    return c.json({ error: "Ask has reached its configured call budget. Live calls are paused.", code: "ask-budget" }, 429);
-  }
-  const since = new Date(Date.now() - 60_000).toISOString();
-  const recent = await c.env.DB.prepare("SELECT COUNT(*) AS n FROM chat_calls WHERE created_at > ?").bind(since).first<{ n: number }>();
-  if ((recent?.n ?? 0) >= 12) return c.json({ error: "Ask is rate limited for a minute.", code: "ask-rate" }, 429);
+  if (!c.env.XAI_API_KEY) return c.json({ error: "Ask is unavailable. XAI_API_KEY is not configured.", code: "ask-unconfigured" }, 503);
   let runId: string | null = null;
   if (body?.runId) {
     const row = await getRun(c.env.DB, body.runId);
     if (!row) return c.json({ error: "Run not found." }, 404);
     if (!(await tokenMatches(row, bearer(c.req.raw)))) return c.json({ error: "Run authentication is required." }, 401);
-    const turns = await c.env.DB.prepare("SELECT COUNT(*) AS n FROM chat_calls WHERE run_id = ? AND status = 'ok'").bind(row.id).first<{ n: number }>();
-    if ((turns?.n ?? 0) >= forkConfig.runBudget.maxChatTurns) {
-      return c.json({ error: "This run has used its chat turns.", code: "ask-turns" }, 409);
-    }
+    if (row.status !== "running") return c.json({ error: "Ask requires an active run." }, 409);
     runId = row.id;
   }
+  const callId = await reserveCall(c.env, runId);
+  if (!callId) return c.json({ error: "Ask has reached its call or rate budget. Try later or ask the operator to review the budget.", code: "ask-budget" }, 429);
   const result = await askCatalogue(c.env, bounded.messages);
   await c.env.DB.prepare(
-    `INSERT INTO chat_calls (id, created_at, run_id, model, prompt_tokens, completion_tokens, latency_ms, status, error)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  )
-    .bind(
-      crypto.randomUUID(),
-      new Date().toISOString(),
-      runId,
-      result.model,
-      result.ok ? result.usage.promptTokens : null,
-      result.ok ? result.usage.completionTokens : null,
-      result.latencyMs,
-      result.ok ? "ok" : result.code,
-      result.ok ? null : result.error,
-    )
-    .run();
+    "UPDATE chat_calls SET model = ?, prompt_tokens = ?, completion_tokens = ?, latency_ms = ?, status = ?, error = ? WHERE id = ?",
+  ).bind(result.model, result.ok ? result.usage.promptTokens : null, result.ok ? result.usage.completionTokens : null,
+    result.latencyMs, result.ok ? "ok" : result.code, result.ok ? null : result.error, callId).run();
   if (!result.ok) return c.json({ error: result.error, code: result.code, model: result.model, latencyMs: result.latencyMs }, result.status as 422);
   return c.json(result);
 });
@@ -291,6 +276,8 @@ app.post("/api/explain", async (c) => {
   if (!c.env.XAI_API_KEY) {
     return c.json({ ok: false, error: "Synthesis is unavailable. XAI_API_KEY is not configured. Constraint receipts are unchanged." }, 503);
   }
+  const callId = await reserveCall(c.env, null);
+  if (!callId) return c.json({ error: "The model call budget is exhausted." }, 429);
   const prompt = synthesisPrompt(snapshot);
   try {
     const response = await fetch("https://api.x.ai/v1/chat/completions", {
@@ -298,8 +285,9 @@ app.post("/api/explain", async (c) => {
       headers: { authorization: `Bearer ${c.env.XAI_API_KEY}`, "content-type": "application/json" },
       signal: AbortSignal.timeout(20000),
       body: JSON.stringify({
-        model: c.env.GROK_MODEL || "grok-4.7",
+        model: c.env.GROK_MODEL || "grok-4.20-0309-non-reasoning",
         temperature: 0.2,
+        ...(c.env.GROK_MODEL.includes("non-reasoning") ? {} : { reasoning_effort: "low" }),
         messages: [
           { role: "system", content: prompt },
           { role: "user", content: JSON.stringify(snapshot.cells) },
@@ -316,9 +304,9 @@ app.post("/api/explain", async (c) => {
       snapshotHash,
       text,
       new Date().toISOString(),
-      c.env.GROK_MODEL || "grok-4.7",
+      c.env.GROK_MODEL || "grok-4.20-0309-non-reasoning",
     ).run();
-    return c.json({ ok: true, text, model: c.env.GROK_MODEL || "grok-4.7", cached: false });
+    return c.json({ ok: true, text, model: c.env.GROK_MODEL || "grok-4.20-0309-non-reasoning", cached: false });
   } catch {
     return c.json({ ok: false, error: "Synthesis failed. Constraint receipts are unchanged." }, 502);
   }
@@ -328,7 +316,7 @@ app.post("/api/decisions", async (c) => {
   if (!(await isAdmin(c.req.raw, c.env.ADMIN_KEY))) return c.json({ error: "Admin authentication is required." }, 401);
   const body = await readJson<{ action?: DecisionAction; variantId?: string; rationale?: string; runIds?: string[] }>(c);
   if (!body?.action || !["choose", "revise", "defer"].includes(body.action)) return c.json({ error: "action must be choose, revise, or defer." }, 400);
-  if (!body.rationale?.trim()) return c.json({ error: "A rationale is required." }, 400);
+  if (typeof body.rationale !== "string" || !body.rationale.trim()) return c.json({ error: "A rationale is required." }, 400);
   if (body.action === "choose" && !body.variantId) return c.json({ error: "Choosing requires a variant." }, 400);
   if (body.variantId && !forkConfig.variants.some((variant) => variant.id === body.variantId)) {
     return c.json({ error: "Unknown variant." }, 400);
@@ -371,6 +359,30 @@ app.get("/api/decisions", async (c) => {
     adopted: await readAdoption(c.env.DB),
   });
 });
+
+
+app.get("/api/decisions/:id", async (c) => {
+  const decision = (await listDecisions(c.env.DB)).find((item) => item.id === c.req.param("id"));
+  if (!decision) return c.json({ error: "Decision not found." }, 404);
+  return c.json({ id: decision.id, action: decision.action, variantId: decision.selected_variant_id,
+    rationale: decision.rationale, createdAt: decision.created_at, snapshot: JSON.parse(decision.evidence_snapshot_json) });
+});
+
+async function reserveCall(env: Env, runId: string | null): Promise<string | null> {
+  const configured = Number(env.ASK_CALL_BUDGET || "40");
+  const budget = Number.isFinite(configured) ? Math.max(0, Math.floor(configured)) : 40;
+  const id = crypto.randomUUID();
+  // Reserving before fetch makes concurrent requests share the same hard budget.
+  // Failed or timed-out upstream attempts still consume a reservation.
+  const result = await env.DB.prepare(`INSERT INTO chat_calls (id, created_at, run_id, model, status)
+    SELECT ?, ?, ?, ?, 'pending'
+    WHERE (SELECT COUNT(*) FROM chat_calls) < ?
+      AND (SELECT COUNT(*) FROM chat_calls WHERE created_at > ?) < 12
+      AND (? IS NULL OR (SELECT COUNT(*) FROM chat_calls WHERE run_id = ?) < ?)`)
+    .bind(id, new Date().toISOString(), runId, env.GROK_MODEL, budget,
+      new Date(Date.now() - 60_000).toISOString(), runId, runId, forkConfig.runBudget.maxChatTurns).run();
+  return result.meta.changes === 1 ? id : null;
+}
 
 function dispatchPrompt(env: Env, row: RunRow, token: string): string {
   const card = cardFor(row);
@@ -433,6 +445,7 @@ function cardFor(row: RunRow) {
 async function fullRun(db: D1Database, row: RunRow) {
   return {
     ...cardFor(row),
+    snapshot: snapshotOf(row),
     startedAt: row.started_at,
     finishedAt: row.finished_at,
     parentRunId: row.parent_run_id,
@@ -517,7 +530,7 @@ async function resultsPayload(db: D1Database) {
 
 async function readAdoption(db: D1Database): Promise<{ variantId: string; decisionId: string; at: string } | null> {
   const raw = await readMeta(db, "adopted");
-  if (!raw) return null;
+  if (!raw) return showSearch.variantId && showSearch.decisionId ? { variantId: showSearch.variantId, decisionId: showSearch.decisionId, at: "repository" } : null;
   return JSON.parse(raw) as { variantId: string; decisionId: string; at: string };
 }
 
@@ -536,7 +549,8 @@ function synthesisPrompt(snapshot: { question: string; evidenceLabel: string }):
 
 async function readJson<T>(c: { req: { json: () => Promise<T> } }): Promise<T | null> {
   try {
-    return await c.req.json();
+    const value = await c.req.json();
+    return value && typeof value === "object" && !Array.isArray(value) ? value : null;
   } catch {
     return null;
   }
