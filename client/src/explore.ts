@@ -37,7 +37,7 @@ function standalone(ctx: ExploreContext, body: string): string {
   return shell("", `
     ${flowSteps(0)}
     <nav class="variant-tabs" aria-label="Approaches">${(["browse", "ask", "guide"] as const).map(id => `<a href="/v/${id}" data-link ${id === ctx.variantId ? 'aria-current="page"' : ""}>${brand.variants[id].name}</a>`).join("")}</nav>
-    <div class="explore-heading"><p class="kicker">Try ${esc(copy.name)}</p><h2>${esc(titles[ctx.variantId])}</h2><p class="lede">${esc(help[ctx.variantId])}</p></div>
+    <div class="explore-heading"><p class="kicker">Show discovery example · ${esc(copy.name)}</p><h2>${esc(titles[ctx.variantId])}</h2><p class="lede">${esc(help[ctx.variantId])}</p></div>
     <div class="variant" style="font-size:${ctx.textScale ?? 1}em">${body}</div>
     <p class="demo-disclosure">${esc(brand.demoBanner)}</p>
   `);

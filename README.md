@@ -27,6 +27,12 @@ When a coding agent asks “How should this work?”, Fork turns the question in
 
 The show catalogue is the example. **Fork is the workflow.**
 
+## Your product. Your question.
+
+Use the same loop for checkout, onboarding, search, pricing or another product decision. Configure the question, build the working alternatives, define missions and personas, then let Grok Bot investigate before choosing what to ship.
+
+This repo is a working show-discovery example. To adapt it, update `fork.config.json`, the variant implementations, domain fixtures and mission evaluators. The current catalogue and constraint rules are show-specific; changing domains requires adapting those components, rather than selecting a universal dropdown.
+
 ![Working Browse alternative with tickadoo artwork](.github/assets/fork-demo.png)
 
 Nine real tickadoo show names and public artwork make the alternatives tangible. Cards link to their tickadoo source. Prices, times, ages and suitability are labelled **demo scenarios**, rather than live inventory.

@@ -24,12 +24,14 @@ export function gallery(config: Config): string {
     <section class="hero">
       <div>
         <div class="lockup">${mark("mark large")}<span class="word">${brand.wordmark}</span></div>
-        <h1>${esc(brand.headline[0])}<br>${esc(brand.headline[1])}</h1>
-        <p class="lede">Try a show search. Watch Grok Bot explore. Take the decision back to Cursor.</p>
+        <p class="kicker">Any product. A better decision.</p>
+        <h1>Explore the options.<br>Choose what ships.</h1>
+        <p class="lede">Configure Fork around your product question, working alternatives and test missions. Grok Bot explores; you decide; Cursor keeps building.</p>
         <a class="primary pitch-start" href="/v/ask" data-link>Start the 60-second demo →</a>
       </div>
       <aside class="plaque">${mark("mark")}<p>${esc(brand.plaque)}</p></aside>
     </section>
+    <div class="product-context"><strong>One workflow. Any product.</strong><span>Checkout · Onboarding · Search · Pricing</span><p>This demo uses show discovery to make the alternatives tangible.</p></div>
     ${flowSteps(0)}
     <section class="interface">
       <p class="kicker">${esc(brand.kicker)}</p>

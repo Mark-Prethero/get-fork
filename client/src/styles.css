@@ -199,3 +199,6 @@ a.primary, a.ghost { display: inline-flex; align-items: center; justify-content:
 .walkthrough-summary .walk-arrow { font-size: 24px; }
 .walkthrough-detail { margin-top: 24px; color: var(--muted); font-size: 14px; }
 @media (max-width: 640px) { .walkthrough-summary { gap: 16px; padding: 16px; flex-wrap: wrap; } .walkthrough-summary strong { font-size: 18px; } }
+.product-context { border: 1px solid var(--line); padding: 16px 20px; margin-top: 24px; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; }
+.product-context span { color: var(--muted); }
+.product-context p { margin: 0; flex-basis: 100%; color: var(--muted); }
