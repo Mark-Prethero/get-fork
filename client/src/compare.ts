@@ -1,6 +1,7 @@
-import { flowSteps, readTrial, mountHandoff, readHandoff } from "./flow.ts";
+import { flowSteps, readTrial, mountHandoff, readHandoff, type Trial } from "./flow.ts";
 import { adminToken } from "./api.ts";
 import { api } from "./api.ts";
+import type { Show } from "@shared/shows.ts";
 import { esc, shell } from "./render.ts";
 
 interface Cell {
@@ -51,7 +52,7 @@ interface RunDetail {
 }
 
 export async function renderCompare(root: HTMLElement): Promise<() => void> {
-  const results = await api<Results>("/api/results");
+  const [results, config] = await Promise.all([api<Results>("/api/results"), api<{ shows: Show[] }>("/api/config")]);
   if (root.dataset.page !== "/compare") return () => {};
   const trial = readTrial();
   const initialVariant = trial?.variantId ?? "browse";
@@ -72,18 +73,17 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
       <h2>Which approach should we build?</h2>
       <p class="lede">${esc(results.question)}</p>
       <p class="quiet">${esc(results.evidenceLabel)}</p>
-      <p class="note">Each walkthrough keeps its original build and catalogue. Earlier recordings use the invented-show catalogue; new runs use the tickadoo examples.</p>
-      <div class="row"><a class="primary" href="/compare#decision" data-link>Choose a direction →</a><a class="ghost" href="/walkthrough" data-link>Watch the fresh Grok Bot walkthrough</a></div>
-      ${trial ? `<p class="note">You just tried ${esc(trial.variantId)}. Your show choice was a manual demo trial; the recordings below are separate evidence.</p>` : ""}
-      ${table(core, results)}
-      <details>
-        <summary>The Group Organiser, when those runs exist</summary>
-        ${table(stretch, results)}
+      ${humanComparison(trial, config.shows)}
+      <details class="recorded-evidence">
+        <summary>Inspect server-recorded investigations and earlier attempts</summary>
+        <p class="note">These original recordings use their own builds and catalogues. Public Bot walkthroughs above have no server receipt and remain separate.</p>
+        ${table(core, results)}
+        <details><summary>Additional Group Organiser recordings, when available</summary>${table(stretch, results)}</details>
+        <section class="panel" data-detail></section>
       </details>
-      <section class="panel" data-detail></section>
       <section class="panel" id="decision">
         <p class="kicker">Your decision</p><h2>Choose what happens next.</h2>
-        <p class="quiet">Choose an approach, explain why, and get a handoff you can paste into Cursor.</p>
+        <p class="quiet">Your show choice was the trial. Now choose which product approach Cursor should build, explain why, and create the handoff.</p>
         ${results.adopted ? `<p><span class="stamp">Chosen</span> ${esc(results.adopted.variantId)} · decision ${esc(results.adopted.decisionId)}</p>` : ""}
         <form class="form" data-decision>
           <label for="action">Action</label>
@@ -97,7 +97,7 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
           <label for="reason">Why this direction?</label>
           <button class="ghost" type="button" data-suggest-reason>Use a suggested reason</button>
           <textarea id="reason" name="reason" required placeholder="What made this approach feel right? What should Cursor build next?"></textarea>
-          <button class="primary" type="submit">Create Cursor handoff →</button>
+          <button class="primary" type="submit">Next: create Cursor handoff →</button>
         </form>
         <p class="note" data-decision-status role="status"></p><div data-handoff></div>
         ${results.decisions.map((decision) => `<p><strong>${esc(decision.action)}</strong> ${esc(decision.variantId ?? "")} — ${esc(decision.rationale)}</p>`).join("")}
@@ -272,4 +272,15 @@ function cellButton(cell: Cell | undefined, profileId: string, variantId: string
     <span>${esc(cell.showTitle ?? "No show")}</span>
     ${cell.artifactUrl ? `<img alt="" src="${esc(cell.artifactUrl)}" />` : `<span>Screenshot: Not captured.</span>`}
   </button>`;
+}
+
+function humanComparison(trial: Trial | null, shows: Show[]): string {
+  const show = shows.find(item => item.id === trial?.showId);
+  const name = trial?.variantId ? trial.variantId.charAt(0).toUpperCase() + trial.variantId.slice(1) : "No trial yet";
+  return `<section class="human-review" id="human-review"><p class="kicker">Your experience + the Bot’s observations</p><h3>Try it yourself. Then make the call.</h3><div class="human-comparison">
+    <article class="review-card human-card"><p class="kicker">You · human trial</p><h3>${esc(name)}</h3>${show?.imageUrl ? `<img src="${esc(show.imageUrl)}" width="960" height="540" alt="Your selected example: ${esc(show.title)} artwork" />` : '<div class="trial-empty">Your experience belongs here.</div>'}<strong>${show ? esc(show.title) : "Choose an example show first"}</strong><p>${show ? `Demo £${show.priceGbp} each · saved in this tab` : "Try Browse, Ask or Guide. Your choice will appear here."}</p><a href="${show ? "/selection" : "/"}" data-link>${show ? "Review your trial →" : "Try an approach →"}</a></article>
+    <article class="review-card"><p class="kicker">Grok Bot · Browse</p><h3>Budget changed</h3><img src="/walkthroughs/tickadoo-browse/final.png" width="1024" height="525" alt="Actual Bot Browse capture" /><strong>The Play That Goes Wrong</strong><p>Faulty Towers (£68) → Play (£29) after the £50 budget twist.</p><a href="/walkthrough" data-link>View Bot walkthrough →</a></article>
+    <article class="review-card"><p class="kicker">Grok Bot · Speedrunner</p><h3>Ask on mobile</h3><img src="/walkthroughs/speedrunner-ask/reply.png" width="390" height="844" alt="Actual Bot mobile Ask reply capture" /><strong>The Comedy About Spies</strong><p>Demo £50 each. Found the next action below the show; we moved it up.</p><a href="/walkthrough?persona=speedrunner" data-link>View Bot walkthrough →</a></article>
+    <article class="review-card"><p class="kicker">Grok Bot · Group Organiser</p><h3>Guide + constraints</h3><img src="/walkthroughs/group-organiser-guide/final.png" width="1024" height="525" alt="Actual Bot Guide final selection capture" /><strong>The Mousetrap</strong><p>Faulty Towers (£68) → Mousetrap (£48), keeping age and runtime needs.</p><a href="/walkthrough?persona=group" data-link>View Bot walkthrough →</a></article>
+    </div><p class="note">These are show selections from different missions, not votes for a winning approach. Your trial is local; the three real Bot reports are operator-archived public walkthroughs. You make the final product decision.</p><a class="primary" href="/compare#decision" data-link>Next: make my final decision →</a></section>`;
 }

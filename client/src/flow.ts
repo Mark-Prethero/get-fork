@@ -11,6 +11,7 @@ export function readTrial(): Trial | null {
   } catch { return null; }
 }
 export function saveTrial(variantId: VariantId, showId: string): void {
+  sessionStorage.removeItem("fork.handoff");
   sessionStorage.setItem("fork.trial", JSON.stringify({ variantId, showId, buildId: BUILD_ID }));
 }
 export function flowSteps(current: number): string {
@@ -31,7 +32,7 @@ export function selection(shows: Show[]): string {
         <div><span class="stamp">Your choice</span><h3>${esc(show.title)}</h3><p>${esc(show.description)}</p><p class="quiet">Demo scenario · ${esc(show.whenLabel)} ${esc(show.time)} · £${show.priceGbp} per person</p></div>
       </article>
       <aside class="next-step"><p class="kicker">Next: evaluate the approach</p><h3>Did ${esc(name)} make the choice easier?</h3><p>You’ve tried the experience. Review Grok Bot’s walkthroughs, compare the trade-offs, then choose a direction for your coding agent.</p>
-        <a class="primary" href="/walkthrough" data-link>Watch Grok Bot & continue →</a>
+        <a class="primary" href="/walkthrough" data-link>Next: watch Grok Bot →</a>
         <a href="/" data-link>Try another approach</a>
         <a href="/v/${trial.variantId}" data-link>Make another show choice</a>
       </aside>

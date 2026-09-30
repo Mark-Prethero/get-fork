@@ -63,7 +63,7 @@ Optional working walkthrough:
 1. **Start:** show the `/fork` prompt on the homepage: Cursor frames and builds the alternatives.
 2. **Explore:** open [Ask](https://get-fork-demo.proud-wood-517d.workers.dev/v/ask), click the Date night example, then choose a show. The other alternatives remain one tab away.
 3. **Watch:** follow Watch Grok Bot to the [real walkthroughs](https://get-fork-demo.proud-wood-517d.workers.dev/walkthrough). Three correctly named chats in the Grok Bot app provide the original reports. Detailed recorded evidence is available separately.
-4. **Decide:** choose, revise or defer an approach and explain why. Public visitors create a draft; an authenticated operator records the decision with an immutable evidence snapshot.
+4. **Decide:** review your own selected example alongside the three real Bot walkthroughs, then choose, revise or defer an approach and explain why. Public visitors create a draft; an authenticated operator records the decision with an immutable evidence snapshot.
 5. **Continue building:** copy or download the Cursor handoff. It includes the reason, evidence links and next steps. Recorded decisions can be exported and adopted with the CLI.
 
 ## Fresh Grok Bot walkthrough

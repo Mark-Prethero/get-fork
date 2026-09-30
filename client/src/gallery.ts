@@ -23,7 +23,7 @@ export function gallery(config: Config): string {
     </a>`;
   }).join("");
   return shell("home", `
-    <section class="landing-hero"><h1 class="sr-only">Build the alternatives. Watch Grok Bot explore. Choose what ships.</h1><img src="/fork-banner.svg" width="1280" height="460" alt="fork — A new branch of thinking. Build the alternatives. Watch Grok Bot explore. Choose what ships." /><div class="landing-hero-actions"><a class="primary" href="/pitch" data-link>See the one-minute pitch →</a><a class="cursor-use" href="https://github.com/Mark-Prethero/get-fork#start-from-cursor" target="_blank" rel="noopener noreferrer">Use in Cursor ↗</a><a href="/v/ask" data-link>Try the working demo →</a></div></section>
+    <section class="landing-hero"><h1 class="sr-only">Build the alternatives. Watch Grok Bot explore. Choose what ships.</h1><img src="/fork-banner.svg" width="1280" height="460" alt="fork — A new branch of thinking. Build the alternatives. Watch Grok Bot explore. Choose what ships." /><div class="landing-hero-actions"><a class="primary" href="/pitch" data-link>Start the one-minute pitch →</a><a class="cursor-use" href="https://github.com/Mark-Prethero/get-fork#start-from-cursor" target="_blank" rel="noopener noreferrer">Use in Cursor ↗</a><a href="/v/ask" data-link>Try the working demo →</a></div></section>
     <section class="hero cursor-intro">
       <div>
 
