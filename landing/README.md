@@ -1,6 +1,6 @@
 # Fork landing preview
 
-`index.html` is the supplied standalone Fork landing page. The hero uses `fork-banner.svg`; other supplied images and styles are embedded. No build step is required. This folder is independent of the hackathon Worker app.
+`index.html` is the supplied standalone Fork landing page. Its supplied images and styles are embedded. No build step is required. The README hero is a browser capture of this original landing page. This folder is independent of the hackathon Worker app.
 
 ## Cloudflare Pages
 

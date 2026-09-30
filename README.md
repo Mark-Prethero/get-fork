@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".github/assets/fork-banner.svg" alt="Fork — Build the alternatives. Watch Grok Bot explore. Choose what ships." width="100%" />
+<img src=".github/assets/fork-landing-hero.png" alt="Fork — Better product decisions, inside your agent workflow. Original landing page with Browse, Ask and Guide alternatives." width="100%" />
 
 [![CI](https://github.com/Mark-Prethero/get-fork/actions/workflows/ci.yml/badge.svg)](https://github.com/Mark-Prethero/get-fork/actions/workflows/ci.yml)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
