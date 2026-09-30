@@ -202,3 +202,15 @@ a.primary, a.ghost { display: inline-flex; align-items: center; justify-content:
 .product-context { border: 1px solid var(--line); padding: 16px 20px; margin-top: 24px; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; }
 .product-context span { color: var(--muted); }
 .product-context p { margin: 0; flex-basis: 100%; color: var(--muted); }
+
+.persona-tabs { flex-wrap: wrap; }
+.persona-shot { margin: 24px 0; }
+.persona-shot img { display: block; width: 100%; height: auto; border: 1px solid var(--line); }
+.persona-shot figcaption { color: var(--muted); font-size: 13px; margin-top: 8px; }
+.mobile-shot { max-width: 390px; }
+@media (max-width: 640px) {
+  .selection-layout .next-step { order: -1; }
+  .next-step h3 { font-size: 24px; }
+  .next-step { gap: 14px; }
+  .persona-tabs a { padding: 9px 12px; font-size: 13px; }
+}

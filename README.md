@@ -37,10 +37,10 @@ This repo is a working show-discovery example. To adapt it, update `fork.config.
 
 Nine real tickadoo show names and public artwork make the alternatives tangible. Cards link to their tickadoo source. Prices, times, ages and suitability are labelled **demo scenarios**, rather than live inventory.
 
-## The 90-second pitch
+## The 60-second pitch
 
-1. **Explore:** try the same question in the [three alternatives](https://get-fork-demo.proud-wood-517d.workers.dev/), choose an example show, then follow the selection summary to Evidence.
-2. **Watch:** open [Evidence](https://get-fork-demo.proud-wood-517d.workers.dev/compare) to inspect captured browser screenshots, actions and constraint checks.
+1. **Explore:** open [Ask](https://get-fork-demo.proud-wood-517d.workers.dev/v/ask), click the Date night example, then choose a show. The other alternatives remain one tab away.
+2. **Watch:** follow Watch Grok Bot to the [real walkthroughs](https://get-fork-demo.proud-wood-517d.workers.dev/walkthrough). Three correctly named chats in the Grok Bot app provide the original reports. Detailed recorded evidence is available separately.
 3. **Decide:** choose, revise or defer an approach and explain why. Public visitors create a draft; an authenticated operator records the decision with an immutable evidence snapshot.
 4. **Continue building:** copy or download the Cursor handoff. It includes the reason, evidence links and next steps. Recorded decisions can be exported and adopted with the CLI.
 
@@ -53,6 +53,15 @@ The Bot explored the updated tickadoo Browse demo and changed from **Faulty Towe
 ![Final screen captured by Grok Bot](walkthroughs/tickadoo-browse/final.png)
 
 This public walkthrough is operator-archived, separate from the server-recorded comparison grid. It has no server constraint receipt or per-action timestamps.
+
+### Two additional personas, actually run
+
+| Grok Bot chat | Approach | Observation | Report |
+| --- | --- | --- | --- |
+| Fork — Speedrunner | Ask · 390 × 844 mobile emulation | Grok returned The Comedy About Spies (£50). The Bot found the next action below the artwork; the next build moves it above the artwork. | [Actual reply and trace](walkthroughs/speedrunner-ask) |
+| Fork — Group Organiser | Guide · actual 1024 × 525 | Faulty Towers (£68) → The Mousetrap (£48) after the budget twist. The Bot confirmed a clear next step. | [Actual final screenshot and trace](walkthroughs/group-organiser-guide) |
+
+Both explored captured build 2026-09-30.5 and returned reports in the Grok Bot app. These are public walkthroughs with no server run token or receipt; their original observations are preserved.
 
 ## Where Grok Bot fits
 
