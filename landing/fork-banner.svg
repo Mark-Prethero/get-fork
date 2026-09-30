@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="460" viewBox="0 0 1280 460" role="img" aria-labelledby="title desc">
+<title id="title">fork — A new branch of thinking</title><desc id="desc">Build the alternatives. Watch Grok Bot explore. Choose what ships.</desc>
+<rect width="1280" height="460" fill="#101010"/>
+<path d="M1130 62h22l30 40 30-40h22l-42 56v41h-20v-41z" fill="#f3f2ee"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#f3f2ee">
+<text x="64" y="112" font-size="68" letter-spacing="-4">fork</text>
+<text x="65" y="150" font-size="12" letter-spacing="4" fill="#91918b">A NEW BRANCH OF THINKING</text>
+<path d="M64 186h1152" stroke="#33332f"/>
+<text x="64" y="248" font-size="42" font-weight="600" letter-spacing="-1.5">Build the alternatives.</text>
+<text x="64" y="299" font-size="42" font-weight="600" letter-spacing="-1.5" fill="#a5a59e">Watch Grok Bot explore. Choose what ships.</text>
+<g transform="translate(64 357)"><rect width="175" height="44" fill="#2b2b26" stroke="#696960"/><text x="20" y="28" font-size="15">01 / BROWSE</text></g>
+<g transform="translate(257 357)"><rect width="175" height="44" fill="#2b2b26" stroke="#696960"/><text x="20" y="28" font-size="15">02 / ASK</text></g>
+<g transform="translate(450 357)"><rect width="175" height="44" fill="#2b2b26" stroke="#696960"/><text x="20" y="28" font-size="15">03 / GUIDE</text></g>
+<text x="840" y="384" font-size="13" letter-spacing="2" fill="#91918b">BUILT FOR CURSOR · PRAGUE 2026</text>
+</g></svg>

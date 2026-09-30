@@ -39,7 +39,14 @@ Nine real tickadoo show names and public artwork make the alternatives tangible.
 
 ## Start from Cursor
 
-Open this repository in Cursor. In the Agent chat, select `/fork` and add your product question:
+Clone this repository, open the folder in Cursor, then in Agent chat select `/fork` and add your product question:
+
+```bash
+git clone https://github.com/Mark-Prethero/get-fork.git
+```
+
+This uses Cursor’s [project command support](https://docs.cursor.com/en/agent/chat/commands). There is no one-click installer or marketplace extension; adapting this workflow to another existing product requires the configuration and domain changes described above.
+
 
 ```text
 /fork How should people find their next show? Compare browse, ask and a guided flow.

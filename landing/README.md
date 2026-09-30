@@ -1,6 +1,6 @@
 # Fork landing preview
 
-`index.html` is the supplied standalone Fork landing page. Its images and styles are embedded, so no build step is required. This folder is independent of the hackathon Worker app.
+`index.html` is the supplied standalone Fork landing page. The hero uses `fork-banner.svg`; other supplied images and styles are embedded. No build step is required. This folder is independent of the hackathon Worker app.
 
 ## Cloudflare Pages
 
@@ -16,7 +16,7 @@ Changes to this folder on `main` update the hosted page. Other branches can rece
 
 ## Link the app
 
-The live app is https://get-fork-demo.proud-wood-517d.workers.dev/. To change it, set `window.FORK_DEMO_URL` in `index.html` to that HTTPS URL. Until then, the demo button opens the built-in walkthrough. The decision download remains an illustrative example.
+The primary CTA opens the one-minute pitch at https://get-fork-demo.proud-wood-517d.workers.dev/pitch. The working demo remains linked separately. To change it, set `window.FORK_DEMO_URL` in `index.html` to that HTTPS URL. Until then, the demo button opens the built-in walkthrough. The decision download remains an illustrative example.
 
 ## Local preview
 

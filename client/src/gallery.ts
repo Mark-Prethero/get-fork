@@ -1,7 +1,7 @@
 import type { VariantId } from "@shared/brand.ts";
 import { flowSteps } from "./flow.ts";
 import { brand } from "@shared/brand.ts";
-import { esc, icon, mark, shell } from "./render.ts";
+import { esc, icon, shell } from "./render.ts";
 
 export const CURSOR_START_PROMPT = "/fork How should people find their next show? Compare browse, ask and a guided flow. Build working alternatives, give me the Fork preview and Grok Bot missions, then wait for my decision before adoption.";
 
@@ -23,13 +23,14 @@ export function gallery(config: Config): string {
     </a>`;
   }).join("");
   return shell("home", `
-    <section class="hero">
+    <section class="landing-hero"><h1 class="sr-only">Build the alternatives. Watch Grok Bot explore. Choose what ships.</h1><img src="/fork-banner.svg" width="1280" height="460" alt="fork — A new branch of thinking. Build the alternatives. Watch Grok Bot explore. Choose what ships." /><div class="landing-hero-actions"><a class="primary" href="/pitch" data-link>See the one-minute pitch →</a><a class="cursor-use" href="https://github.com/Mark-Prethero/get-fork#start-from-cursor" target="_blank" rel="noopener noreferrer">Use in Cursor ↗</a><a href="/v/ask" data-link>Try the working demo →</a></div></section>
+    <section class="hero cursor-intro">
       <div>
-        <div class="lockup">${mark("mark large")}<span class="word">${brand.wordmark}</span></div>
+
         <p class="kicker">Any product. A better decision.</p>
-        <h1>Explore the options.<br>Choose what ships.</h1>
+        <h2>Start with your question.<br>See the options working.</h2>
         <p class="lede">Start with /fork in Cursor. Build working alternatives for your product question. Grok Bot explores; you decide; Cursor keeps building.</p>
-        <a class="primary pitch-start" href="/pitch" data-link>See the one-minute pitch →</a>
+
       </div>
       <aside class="cursor-start"><p class="kicker">01 · Start in Cursor</p><h2>A product question.<br>One command.</h2><pre><code>/fork How should people find
 their next show?</code></pre><p>Open this repo in Cursor, type <strong>/fork</strong> in chat, then add your question.</p><div class="row"><button class="primary" type="button" data-copy-start>Copy Cursor prompt</button><a href="https://github.com/Mark-Prethero/get-fork/blob/main/.cursor/commands/fork.md" target="_blank" rel="noopener noreferrer">View the command ↗</a></div><p class="copy-start-status" role="status"></p></aside>
