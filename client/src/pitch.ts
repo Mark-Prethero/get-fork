@@ -2,7 +2,7 @@ import { shell } from "./render.ts";
 
 export function pitch(): string {
   return shell("pitch", `
-    <section class="pitch-heading"><p class="kicker">Fork · the one-minute story</p><h1>Stop guessing. Try the alternatives.</h1><p class="lede">When Cursor reaches a product choice, Fork turns it into working options, real Grok Bot investigations and a decision Cursor can build from.</p></section>
+    <section class="pitch-heading"><p class="kicker">Fork · for solo builders & small to medium teams</p><h1>Stop guessing. Try the alternatives.</h1><p class="lede">No dedicated product team? When Cursor reaches a product choice, Fork gives you working alternatives, real Grok Bot investigations and a decision the agent can build from.</p></section>
     <div class="pitch-grid">
       <section class="pitch-panel"><p class="kicker">01 · Start in Cursor</p><h2>A question, not a guess.</h2><pre><code>/fork How should people
 find their next show?</code></pre><p>A repo command guides Cursor to build distinct alternatives for your question.</p><button class="ghost" data-copy-start>Copy Cursor prompt</button><p class="copy-start-status" role="status"></p></section>

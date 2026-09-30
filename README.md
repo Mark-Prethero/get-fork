@@ -9,7 +9,9 @@
 
 **A new branch of thinking.**
 
-When a coding agent asks “How should this work?”, Fork turns the question into working alternatives, browser investigations, and a decision the agent can use.
+**Built for solo builders and small to medium teams.**
+
+When a coding agent asks “How should this work?”, Fork turns the question into working alternatives, browser investigations, and a decision the agent can use. Explore product choices inside your development workflow, especially when you do not have a dedicated product team.
 
 [**Visit Fork →**](https://get-fork.pages.dev/) · [**Try the demo →**](https://get-fork-demo.proud-wood-517d.workers.dev/) · [**Explore the evidence →**](https://get-fork-demo.proud-wood-517d.workers.dev/compare)
 

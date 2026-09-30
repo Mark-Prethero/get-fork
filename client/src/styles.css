@@ -339,3 +339,6 @@ a.primary, a.ghost { display: inline-flex; align-items: center; justify-content:
 @media (max-width: 640px) { .explore-heading { padding: 22px; } .show h3 { font-size: 23px; } .filter-panel { padding: 14px; } }
 
 .review-card:nth-child(3) img { object-position: center; }
+
+.hero-audience { padding: 0 5%; margin: -5px 0 20px; color: #b4b2ac; font-size: 14px; }
+@media (max-width:640px) { .hero-audience { padding: 12px 20px 0; margin: 0; font-size: 13px; } }

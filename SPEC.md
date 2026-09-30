@@ -8,7 +8,7 @@
 
 **Short description:** When your coding agent asks “How should this work?”, Fork builds the options. Grok Bot tries them with different user goals, shows the trade-offs, and saves your decision so the agent can keep building.
 
-**Who it is for:** developers and founders who need to see it working before they know what they want.
+**Who it is for:** solo builders and small to medium teams who need to explore product decisions inside their development workflow, especially without a dedicated product team.
 
 **When they would use it:** a coding agent reaches a meaningful product choice—filters or chat, a form or a guided flow—and the builder cannot confidently choose from a written explanation. They run `/fork`, try the working options, inspect Grok Bot’s observations, and choose a direction. The decision stays with the code for future agent sessions.
 
@@ -488,7 +488,7 @@ Bot runtime is uncertain. Four authentic attempted runs with visible outcomes ar
 
 Prepare a 90-second core and a three-minute expanded version. The supplied schedule allocates 18:00–19:00 to pitches and voting but does not state the individual pitch duration.
 
-- **0:00 — Cursor:** “When your coding agent asks ‘How should this work?’, Fork builds the options. Grok Bot tries them, shows the trade-offs, and saves your choice so the agent can keep building.” Show the product question and `/fork` command. Make the user explicit: “For developers and founders who need to see it working before they know what they want.”
+- **0:00 — Cursor:** “When your coding agent asks ‘How should this work?’, Fork builds the options. Grok Bot tries them, shows the trade-offs, and saves your choice so the agent can keep building.” Show the product question and `/fork` command. Make the user explicit: “For solo builders and small to medium teams who need to explore product decisions inside their development workflow, especially without a dedicated product team.”
 - **0:15 — Implementations:** show Browse, Ask and Guide, their actual variant files and working previews. “This show catalogue is our example. Fork is the workflow around it.” If generation is recorded or already completed, label that honestly.
 - **0:30 — Grok Bot's computer:** replay an authentic screenshot sequence or recorded run, with one mission and at most one grounded comic remark. Explain that the Bot actually used the interface.
 - **0:50 — Evidence:** show the Planner's three runs and the contrasting Speedrunner scenario. Describe one observed trade-off. These are agent investigations, not proof of human preference.
