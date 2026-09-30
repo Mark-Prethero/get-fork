@@ -3,6 +3,7 @@ import { api } from "./api.ts";
 import { renderAdmin } from "./admin.ts";
 import { renderCompare } from "./compare.ts";
 import { mountExplore } from "./explore.ts";
+import { walkthrough } from "./walkthrough.ts";
 import { gallery } from "./gallery.ts";
 import { esc } from "./render.ts";
 import { renderRun } from "./run.ts";
@@ -24,6 +25,8 @@ async function render(): Promise<void> {
       const config = await api<{ question: string; evidenceLabel: string; adopted: { variantId: string } | null }>("/api/config");
       if (version !== renderVersion) return;
       root.innerHTML = gallery(config);
+    } else if (path === "/walkthrough") {
+      root.innerHTML = walkthrough();
     } else if (path === "/compare") {
       const cleanup = await renderCompare(root);
       if (version !== renderVersion) cleanup();

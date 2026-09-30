@@ -133,3 +133,9 @@ summary { cursor: pointer; min-height: 48px; display: flex; align-items: center;
 .bot-feature h2 { margin: 0 0 8px; }
 .bot-feature p { max-width: 62ch; margin: 0; }
 .bot-feature a { display: inline-flex; align-items: center; text-decoration: none; }
+
+.walkthrough-shots { grid-template-columns: 1fr 1fr; }
+.walkthrough-shots figure { margin: 0; min-width: 0; }
+.walkthrough-shots img { width: 100%; height: auto; border: 1px solid var(--line); }
+.walkthrough-shots figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+@media (max-width: 640px) { .walkthrough-shots { grid-template-columns: 1fr; } }

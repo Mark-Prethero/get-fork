@@ -38,6 +38,16 @@ Nine real tickadoo show names and public artwork make the alternatives tangible.
 3. **Decide:** choose, revise or defer an option, with a reason and an immutable evidence snapshot.
 4. **Continue building:** export that decision and adopt the chosen configuration in the repo. Cursor can pick up the saved context.
 
+## Fresh Grok Bot walkthrough
+
+The Bot explored the updated tickadoo Browse demo and changed from **Faulty Towers** (£68 demo scenario) to **The Play That Goes Wrong** (£29) when the budget dropped to £50. It returned actual screenshots and a short trace.
+
+[**Watch the fresh walkthrough →**](https://get-fork-demo.proud-wood-517d.workers.dev/walkthrough) · [**Read the archived Bot report →**](walkthroughs/tickadoo-browse)
+
+![Final screen captured by Grok Bot](walkthroughs/tickadoo-browse/final.png)
+
+This public walkthrough is operator-archived, separate from the server-recorded comparison grid. It has no server constraint receipt or per-action timestamps.
+
 ## Where Grok Bot fits
 
 **Grok Bot is the browser investigator.** An operator queues a mission in Runs, copies its handoff into the real Grok Bot app, and the Bot explores the alternative in its browser. Screenshots, actions, outcome and constraint receipts are saved for replay. Remote dispatch from Fork to the Bot app is currently a manual handoff.

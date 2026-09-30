@@ -40,9 +40,9 @@ export function gallery(config: Config): string {
     </section>
     <section class="bot-feature">
       <div><p class="kicker">Grok Bot · browser investigations</p>
-      <h2>Watch the options being explored.</h2>
-      <p>Inspect saved browser screenshots, factual steps and constraint receipts from the Grok Bot walkthroughs. These are recorded runs; live missions use an operator handoff.</p></div>
-      <a class="primary" href="/compare" data-link>Watch the walkthroughs →</a>
+      <h2>Watch Grok Bot change its mind.</h2>
+      <p>A fresh browser walkthrough of the tickadoo demo: when the budget fell from £80 to £50, Grok Bot changed its choice. See its actual screenshots and report, then compare the formal recorded runs.</p></div>
+      <a class="primary" href="/walkthrough" data-link>Watch the fresh walkthrough →</a>
     </section>
     <p class="foot">${esc(brand.footer)}</p>
     <p class="foot">${esc(config.evidenceLabel)}</p>
