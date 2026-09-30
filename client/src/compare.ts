@@ -1,4 +1,4 @@
-import { brand } from "@shared/brand.ts";
+import { flowSteps, readTrial, mountHandoff, readHandoff } from "./flow.ts";
 import { adminToken } from "./api.ts";
 import { api } from "./api.ts";
 import { esc, shell } from "./render.ts";
@@ -53,7 +53,9 @@ interface RunDetail {
 export async function renderCompare(root: HTMLElement): Promise<() => void> {
   const results = await api<Results>("/api/results");
   if (root.dataset.page !== "/compare") return () => {};
-  let selected = results.cells.find((cell) => cell.runId) ?? null;
+  const trial = readTrial();
+  const initialVariant = trial?.variantId ?? "browse";
+  let selected = results.cells.find((cell) => cell.variantId === initialVariant && cell.runId) ?? results.cells.find((cell) => cell.runId) ?? null;
   let detail: RunDetail | null = null;
   let shot = 0;
   let playing = false;
@@ -65,20 +67,23 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
     const core = results.profiles.filter((profile) => !profile.stretch);
     const stretch = results.profiles.filter((profile) => profile.stretch);
     root.innerHTML = shell("compare", `
-      <p class="kicker">Evidence</p>
-      <h2>${esc(brand.sectionTitle)}</h2>
+      ${flowSteps(location.hash === "#decision" ? 2 : 1)}
+      <p class="kicker">Review & decide</p>
+      <h2>Which approach should we build?</h2>
       <p class="lede">${esc(results.question)}</p>
       <p class="quiet">${esc(results.evidenceLabel)}</p>
       <p class="note">Each walkthrough keeps its original build and catalogue. Earlier recordings use the invented-show catalogue; new runs use the tickadoo examples.</p>
+      <div class="row"><a class="primary" href="/compare#decision" data-link>Choose a direction →</a><a class="ghost" href="/walkthrough" data-link>Watch the fresh Grok Bot walkthrough</a></div>
+      ${trial ? `<p class="note">You just tried ${esc(trial.variantId)}. Your show choice was a manual demo trial; the recordings below are separate evidence.</p>` : ""}
       ${table(core, results)}
       <details>
         <summary>The Group Organiser, when those runs exist</summary>
         ${table(stretch, results)}
       </details>
       <section class="panel" data-detail></section>
-      <section class="panel">
-        <h2>Decision</h2>
-        <p class="quiet">Choosing stays with a person. This does not publish or ship on its own.</p>
+      <section class="panel" id="decision">
+        <p class="kicker">Your decision</p><h2>Choose what happens next.</h2>
+        <p class="quiet">Choose an approach, explain why, and get a handoff you can paste into Cursor.</p>
         ${results.adopted ? `<p><span class="stamp">Chosen</span> ${esc(results.adopted.variantId)} · decision ${esc(results.adopted.decisionId)}</p>` : ""}
         <form class="form" data-decision>
           <label for="action">Action</label>
@@ -88,12 +93,13 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
             <button class="choice" type="button" data-action="defer">Defer</button>
           </div>
           <label for="variant">Approach</label>
-          <div class="choices">${results.variants.map((variant) => `<button class="choice" type="button" data-variant="${esc(variant.id)}" aria-pressed="${variant.id === "guide"}">${esc(variant.name)}</button>`).join("")}</div>
-          <label for="reason">Rationale</label>
-          <textarea id="reason" name="reason" required placeholder="Why this direction, and what is still open."></textarea>
-          <button class="primary" type="submit">Record decision</button>
+          <div class="choices">${results.variants.map((variant) => `<button class="choice" type="button" data-variant="${esc(variant.id)}" aria-pressed="${variant.id === initialVariant}">${esc(variant.name)}</button>`).join("")}</div>
+          <label for="reason">Why this direction?</label>
+          <button class="ghost" type="button" data-suggest-reason>Use a suggested reason</button>
+          <textarea id="reason" name="reason" required placeholder="What made this approach feel right? What should Cursor build next?"></textarea>
+          <button class="primary" type="submit">Create Cursor handoff →</button>
         </form>
-        <p class="note" data-decision-status></p>
+        <p class="note" data-decision-status role="status"></p><div data-handoff></div>
         ${results.decisions.map((decision) => `<p><strong>${esc(decision.action)}</strong> ${esc(decision.variantId ?? "")} — ${esc(decision.rationale)}</p>`).join("")}
       </section>
     `);
@@ -107,7 +113,7 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
     });
     const form = root.querySelector<HTMLFormElement>("[data-decision]");
     let action = "choose";
-    let variant = "guide";
+    let variant: string = initialVariant;
     form?.querySelectorAll<HTMLButtonElement>("[data-action]").forEach((button) => {
       button.addEventListener("click", () => {
         action = button.dataset.action ?? "choose";
@@ -120,11 +126,18 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
         form.querySelectorAll<HTMLButtonElement>("[data-variant]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
       });
     });
+    form?.querySelector("[data-suggest-reason]")?.addEventListener("click", () => {
+      const input = form.querySelector<HTMLTextAreaElement>("[name=reason]");
+      if (input) input.value = action === "defer" ? "I want more evidence before choosing a direction." : `I prefer ${variant} because ${results.variants.find(item => item.id === variant)?.assumption.toLowerCase() ?? "it fits the intended experience."}`;
+    });
     form?.addEventListener("submit", (event) => {
       event.preventDefault();
       const reason = String(new FormData(form).get("reason") ?? "");
       void record(action, variant, reason);
     });
+    const savedHandoff = readHandoff();
+    const handoffHost = root.querySelector("[data-handoff]");
+    if (savedHandoff && handoffHost) mountHandoff(handoffHost, savedHandoff, false);
     paintDetail();
   };
 
@@ -205,6 +218,15 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
 
   async function record(action: string, variant: string, reason: string): Promise<void> {
     const status = root.querySelector("[data-decision-status]");
+    const runIds = results.cells.map(cell => cell.runId).filter((id): id is string => Boolean(id));
+    const handoff = { action, variantId: action === "defer" ? null : variant, rationale: reason.trim(), runIds, trial };
+    if (!handoff.rationale) { if (status) status.textContent = "Add a reason so Cursor knows why you chose this direction."; return; }
+    const host = root.querySelector("[data-handoff]");
+    if (!adminToken()) {
+      if (status) status.textContent = "Draft saved in this tab. An operator can record it before adoption.";
+      if (host) mountHandoff(host, handoff);
+      return;
+    }
     try {
       const saved = await api<{ id: string }>("/api/decisions", {
         method: "POST",
@@ -215,7 +237,8 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
           runIds: results.cells.map((cell) => cell.runId).filter(Boolean),
         }),
       }, adminToken());
-      if (status) status.textContent = `Recorded ${saved.id}. Save this same decision to your repo with: node scripts/fork.mjs record --decision ${saved.id}`;
+      if (status) status.textContent = "Decision recorded with its evidence snapshot.";
+      if (host) mountHandoff(host, { ...handoff, decisionId: saved.id });
     } catch (error) {
       if (status) status.textContent = error instanceof Error ? error.message : "Could not record the decision.";
     }

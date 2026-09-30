@@ -33,10 +33,10 @@ Nine real tickadoo show names and public artwork make the alternatives tangible.
 
 ## The 90-second pitch
 
-1. **Explore:** open the [three alternatives](https://get-fork-demo.proud-wood-517d.workers.dev/) and try the same show-search question.
+1. **Explore:** try the same question in the [three alternatives](https://get-fork-demo.proud-wood-517d.workers.dev/), choose an example show, then follow the selection summary to Evidence.
 2. **Watch:** open [Evidence](https://get-fork-demo.proud-wood-517d.workers.dev/compare) to inspect captured browser screenshots, actions and constraint checks.
-3. **Decide:** choose, revise or defer an option, with a reason and an immutable evidence snapshot.
-4. **Continue building:** export that decision and adopt the chosen configuration in the repo. Cursor can pick up the saved context.
+3. **Decide:** choose, revise or defer an approach and explain why. Public visitors create a draft; an authenticated operator records the decision with an immutable evidence snapshot.
+4. **Continue building:** copy or download the Cursor handoff. It includes the reason, evidence links and next steps. Recorded decisions can be exported and adopted with the CLI.
 
 ## Fresh Grok Bot walkthrough
 

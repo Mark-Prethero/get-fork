@@ -3,6 +3,7 @@ import { api } from "./api.ts";
 import { renderAdmin } from "./admin.ts";
 import { renderCompare } from "./compare.ts";
 import { mountExplore } from "./explore.ts";
+import { selection } from "./flow.ts";
 import { walkthrough } from "./walkthrough.ts";
 import { gallery } from "./gallery.ts";
 import { esc } from "./render.ts";
@@ -25,6 +26,10 @@ async function render(): Promise<void> {
       const config = await api<{ question: string; evidenceLabel: string; adopted: { variantId: string } | null }>("/api/config");
       if (version !== renderVersion) return;
       root.innerHTML = gallery(config);
+    } else if (path === "/selection") {
+      const config = await api<{ shows: Show[] }>("/api/config");
+      if (version !== renderVersion) return;
+      root.innerHTML = selection(config.shows);
     } else if (path === "/walkthrough") {
       root.innerHTML = walkthrough();
     } else if (path === "/compare") {
@@ -42,7 +47,7 @@ async function render(): Promise<void> {
       } else {
         const config = await api<{ shows: Show[]; evidenceLabel: string }>("/api/config");
         if (version !== renderVersion) return;
-        mountExplore(root, { variantId, shows: config.shows, evidenceLabel: config.evidenceLabel });
+        dispose = mountExplore(root, { variantId, shows: config.shows, evidenceLabel: config.evidenceLabel });
       }
     } else {
       root.innerHTML = "<p class=\"shell\">This page is not part of Fork.</p>";
@@ -59,9 +64,9 @@ document.addEventListener("click", (event) => {
   if (event.button !== 0 || link.origin !== location.origin) return;
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   event.preventDefault();
-  history.pushState({}, "", link.pathname);
-  void render();
+  history.pushState({}, "", link.pathname + link.search + link.hash);
+  void render().then(() => { if (link.hash) document.getElementById(link.hash.slice(1))?.scrollIntoView({ block: "start" }); else window.scrollTo({ top: 0 }); });
 });
 
-window.addEventListener("popstate", () => void render());
+window.addEventListener("popstate", () => { void render().then(() => window.scrollTo({ top: 0 })); });
 void render();

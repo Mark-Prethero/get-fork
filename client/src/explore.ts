@@ -1,8 +1,9 @@
 import { brand } from "@shared/brand.ts";
 import { matchesBrowse, matchesGuide, type BrowseFilters, type GuideAnswers } from "@shared/match.ts";
-import { formatGbp, type Show } from "@shared/shows.ts";
+import { type Show } from "@shared/shows.ts";
 import { describeFilters, emptyBrowseFilters, genreOptions, priceOptions, runtimeOptions } from "../../src/variants/browse/index.ts";
 import { answersFromGuide, guideSteps } from "../../src/variants/guide/steps.ts";
+import { flowSteps, saveTrial } from "./flow.ts";
 import { api } from "./api.ts";
 import { esc, shell, showCard } from "./render.ts";
 
@@ -17,23 +18,28 @@ export interface ExploreContext {
   onEvent?: (type: string, payload: unknown) => void;
 }
 
-export function mountExplore(root: HTMLElement, ctx: ExploreContext, embedded = false): void {
+export function mountExplore(root: HTMLElement, ctx: ExploreContext, embedded = false): () => void {
+  let active = true;
   const paint = (body: string) => {
+    if (!active) return;
     root.innerHTML = embedded ? `<div class="variant" style="font-size:${ctx.textScale ?? 1}em">${body}</div>` : standalone(ctx, body);
   };
   if (ctx.variantId === "browse") mountBrowse(root, ctx, paint);
   else if (ctx.variantId === "ask") mountAsk(root, ctx, paint);
   else mountGuide(root, ctx, paint);
+  return () => { active = false; };
 }
 
 function standalone(ctx: ExploreContext, body: string): string {
   const copy = brand.variants[ctx.variantId];
+  const titles = { browse: "Find your next show.", ask: "Tell Grok what you're looking for.", guide: "Let's narrow it down." };
+  const help = { browse: "Set your filters, explore the cards and choose a show.", ask: "Describe your evening. Grok will find matching shows from this demo catalogue.", guide: "Answer five quick questions, then choose from your matches." };
   return shell("", `
-    <p class="banner">${esc(brand.demoBanner)}</p>
-    <p class="kicker">${esc(copy.name)}</p>
-    <h2 class="page-title">${esc(copy.line)}</h2>
-    <p class="quiet">${esc(copy.assumption)}</p>
+    ${flowSteps(0)}
+    <nav class="variant-tabs" aria-label="Approaches">${(["browse", "ask", "guide"] as const).map(id => `<a href="/v/${id}" data-link ${id === ctx.variantId ? 'aria-current="page"' : ""}>${brand.variants[id].name}</a>`).join("")}</nav>
+    <div class="explore-heading"><p class="kicker">Try ${esc(copy.name)}</p><h2>${esc(titles[ctx.variantId])}</h2><p class="lede">${esc(help[ctx.variantId])}</p></div>
     <div class="variant" style="font-size:${ctx.textScale ?? 1}em">${body}</div>
+    <p class="demo-disclosure">${esc(brand.demoBanner)}</p>
   `);
 }
 
@@ -43,7 +49,7 @@ function mountBrowse(root: HTMLElement, ctx: ExploreContext, paint: (body: strin
     const active = describeFilters(filters);
     const matched = ctx.shows.filter((show) => matchesBrowse(show, filters));
     paint(`
-      <div class="filters" style="margin-top:18px">
+      <div class="filters filter-panel" style="margin-top:18px">
         ${chip("Tonight", filters.tonight, "tonight")}
         ${genreOptions.map((genre) => chip(genre, filters.genres.includes(genre), `genre:${genre}`)).join("")}
         ${priceOptions.map((option) => chip(option.label, option.value !== null && filters.maxPrice === option.value, `price:${option.id}`)).join("")}
@@ -87,17 +93,21 @@ function chip(label: string, pressed: boolean, id: string): string {
 function mountAsk(root: HTMLElement, ctx: ExploreContext, paint: (body: string) => void): void {
   const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
   let cards: Show[] = [];
-  let status = "Describe the evening in your own words.";
+  let status = "Choose an example or write your own request.";
+  let diagnostics = "";
+  const examples = ["A funny show tonight, for a date, under £80 per person.", "Something funny tonight for two adults, under £50 each.", "A show tonight for adults and a 15-year-old, under £80 each and 150 minutes."];
   let sending = false;
   let draft = "";
   const draw = () => {
     paint(`
-      <div class="thread">${messages.map((message) => `<div class="bubble ${message.role}">${esc(message.content)}</div>`).join("")}</div>
-      <form class="composer">
-        <textarea name="message" aria-label="Your request" maxlength="400" ${sending ? "disabled" : ""} placeholder="A funny show tonight, for a date, under £80.">${esc(draft)}</textarea>
-        <button class="primary" type="button" data-send ${sending ? "disabled" : ""}>${sending ? "Searching…" : "Send"}</button>
+      ${!messages.length ? `<section class="ask-start"><p class="kicker">Try a one-click example</p><div class="prompt-examples">${examples.map((text, i) => `<button class="example-prompt" type="button" data-example="${i}">${["Date night →", "A smaller budget →", "Taking a teenager →"][i]}<span>${esc(text)}</span></button>`).join("")}</div></section>` : ""}
+      <div class="thread" aria-live="polite">${messages.map((message) => `<div class="bubble ${message.role}"><span class="speaker">${message.role === "user" ? "You" : "Grok"}</span>${esc(message.content)}</div>`).join("")}</div>
+      <form class="composer"><label for="request">${messages.length ? "Refine your search" : "Your evening, in your words"}</label>
+        <textarea id="request" name="message" aria-label="Your request" maxlength="400" ${sending ? "disabled" : ""} placeholder="Tell me about the occasion, budget and kind of show…">${esc(draft)}</textarea>
+        <button class="primary" type="button" data-send ${sending ? "disabled" : ""}>${sending ? "Grok is finding your matches…" : "Find shows with Grok →"}</button>
       </form>
-      <p class="note" data-status>${esc(status)}</p>
+      <p class="note" data-status role="status">${esc(status)}</p>
+      ${diagnostics ? `<details class="diagnostics"><summary>Response details</summary><p>${esc(diagnostics)}</p></details>` : ""}
       <div class="shows">${cards.map(showCard).join("")}</div>
     `);
     const sendFromForm = () => {
@@ -112,6 +122,8 @@ function mountAsk(root: HTMLElement, ctx: ExploreContext, paint: (body: string) 
       event.preventDefault();
       sendFromForm();
     });
+    root.querySelectorAll<HTMLButtonElement>("[data-example]").forEach(button => button.addEventListener("click", () => { void send(examples[Number(button.dataset.example)] ?? ""); }));
+    root.querySelector<HTMLTextAreaElement>("[name=message]")?.addEventListener("input", event => { draft = (event.target as HTMLTextAreaElement).value; });
     bindChoose(root, ctx);
   };
   async function send(message: string): Promise<void> {
@@ -136,8 +148,9 @@ function mountAsk(root: HTMLElement, ctx: ExploreContext, paint: (body: string) 
       messages.push({ role: "assistant", content: result.reply });
       cards = result.shows;
       const usage = `Tokens in ${result.usage.promptTokens ?? "not captured"}, out ${result.usage.completionTokens ?? "not captured"}. Cost ${result.cost}.`;
-      status = `Reply in ${(result.latencyMs / 1000).toFixed(1)}s · ${result.model}. ${usage}`;
-      if (result.rejectedIds.length) status += ` Rejected unknown ids: ${result.rejectedIds.join(", ")}.`;
+      status = cards.length ? `${cards.length} ${cards.length === 1 ? "match" : "matches"}. Choose a show or refine your request.` : "No matches yet. Try changing your budget or the kind of show.";
+      diagnostics = `Reply in ${(result.latencyMs / 1000).toFixed(1)}s · ${result.model}. ${usage}`;
+      if (result.rejectedIds.length) diagnostics += ` Rejected unknown ids: ${result.rejectedIds.join(", ")}.`;
       ctx.onEvent?.("chat", { role: "assistant", showIds: result.shows.map((show) => show.id), rejectedIds: result.rejectedIds, latencyMs: result.latencyMs });
     } catch (error) {
       draft = message;
@@ -217,13 +230,10 @@ function bindChoose(root: HTMLElement, ctx: ExploreContext): void {
         ctx.onChoose(showId);
         return;
       }
-      const note = root.querySelector("[data-status]") ?? root.querySelector(".variant");
-      const line = document.createElement("p");
-      line.className = "note";
-      line.textContent = show
-        ? `Selected ${show.title} (${formatGbp(show.priceGbp)}) in this preview. Recorded runs evaluate constraints on the server.`
-        : "That show is not in the catalogue.";
-      note?.appendChild(line);
+      if (!show) return;
+      saveTrial(ctx.variantId, showId);
+      history.pushState({}, "", "/selection");
+      window.dispatchEvent(new PopStateEvent("popstate"));
     });
   });
 }
