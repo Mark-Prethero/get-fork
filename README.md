@@ -1,42 +1,109 @@
-# Fork
+<div align="center">
 
-When a coding agent asks “How should this work?”, Fork builds the options. Grok Bot tries them, shows the trade-offs, and saves the choice so the next agent can keep building.
+<img src=".github/assets/fork-banner.svg" alt="Fork — Build the alternatives. Watch Grok Bot explore. Choose what ships." width="100%" />
 
-The show catalogue is the example. Fork is the workflow.
+[![CI](https://github.com/Mark-Prethero/get-fork/actions/workflows/ci.yml/badge.svg)](https://github.com/Mark-Prethero/get-fork/actions/workflows/ci.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-F38020?logo=cloudflare&logoColor=white)
+![Built for Cursor](https://img.shields.io/badge/Built_for-Cursor-111111)
 
-## Run locally
+**A new branch of thinking.**
 
-```bash
-npm install
-cp .dev.vars.example .dev.vars
-npm run setup
-npm run dev
+When a coding agent asks “How should this work?”, Fork turns the question into working alternatives, browser investigations, and a decision the agent can use.
+
+[**Visit Fork →**](https://get-fork.pages.dev/) · [**Try the demo →**](https://get-fork-demo.proud-wood-517d.workers.dev/) · [**Explore the evidence →**](https://get-fork-demo.proud-wood-517d.workers.dev/compare)
+
+</div>
+
+## One question. Three working futures.
+
+**How should people find their next show?** Browse, Ask and Guide share the same catalogue and mission. Each expresses a different product bet.
+
+| Alternative | Interaction | Product bet |
+| --- | --- | --- |
+| **Browse** | Visible cards and explicit filters | People want to see and control their choices. |
+| **Ask** | Natural language with Grok | People want to describe what they need. |
+| **Guide** | A short sequence of questions | People want help narrowing the decision. |
+
+The show catalogue is the example. **Fork is the workflow.**
+
+![Working Browse alternative with tickadoo artwork](.github/assets/fork-demo.png)
+
+Nine real tickadoo show names and public artwork make the alternatives tangible. Cards link to their tickadoo source. Prices, times, ages and suitability are labelled **demo scenarios**, rather than live inventory.
+
+## The 90-second pitch
+
+1. **Explore:** open the [three alternatives](https://get-fork-demo.proud-wood-517d.workers.dev/) and try the same show-search question.
+2. **Watch:** open [Evidence](https://get-fork-demo.proud-wood-517d.workers.dev/compare) to inspect captured browser screenshots, actions and constraint checks.
+3. **Decide:** choose, revise or defer an option, with a reason and an immutable evidence snapshot.
+4. **Continue building:** export that decision and adopt the chosen configuration in the repo. Cursor can pick up the saved context.
+
+## Where Grok Bot fits
+
+**Grok Bot is the browser investigator.** An operator queues a mission in Runs, copies its handoff into the real Grok Bot app, and the Bot explores the alternative in its browser. Screenshots, actions, outcome and constraint receipts are saved for replay. Remote dispatch from Fork to the Bot app is currently a manual handoff.
+
+**Grok powers Ask through the xAI API.** That live conversation is a separate role from Grok Bot driving the browser. The server calls `grok-4.20-0309-non-reasoning`; keys remain on the Worker.
+
+The original four investigations include two successful walkthroughs and two Ask failures caused by a missing API key. Those failures remain visible. New attempts never overwrite the original evidence. The current Ask integration is configured and has been verified live.
+
+Agent walkthroughs are **not real-user research**. Unrun combinations remain “Not run”; phone frames are “Mobile emulation”. Original recordings retain their original build and catalogue. The archived catalogue prevents later artwork changes from rewriting history.
+
+## From evidence back to code
+
+```text
+Product question → Working alternatives → Grok Bot investigation
+                                             ↓
+Cursor continues ← Adopted config ← Decision + evidence snapshot
 ```
-
-Open http://127.0.0.1:8787
-
-Set `ADMIN_KEY` and `BOT_INGEST_KEY` in `.dev.vars`. Set `XAI_API_KEY` when Ask should call Grok. Until that key exists, Ask says it is unavailable and does not invent matches.
 
 ```bash
 node scripts/fork.mjs status
 node scripts/fork.mjs queue
 node scripts/fork.mjs record --action defer --reason "Need another mission"
-node scripts/fork.mjs adopt --variant guide --decision <id>
+node scripts/fork.mjs record --decision <saved-decision-id>
+node scripts/fork.mjs adopt --variant guide --decision <saved-decision-id>
 ```
 
-`adopt` updates `src/config/show-search.ts` only after a recorded choose decision. It does not deploy.
+`adopt` requires a recorded choose decision. It updates `src/config/show-search.ts` only after the server accepts the adoption; deployment is a separate step. `record --decision` exports the existing saved snapshot without creating a duplicate decision.
 
-## Evidence
+## Run locally
 
-Agent walkthroughs are not real-user research. Comparison cells that were not run stay labelled “Not run”. Mobile frames are labelled “Mobile emulation”.
+Requires Node.js 22.
 
-## Live demo and deployment
+```bash
+npm ci
+cp .dev.vars.example .dev.vars
+npm run setup
+npm run dev
+```
 
-Landing: https://get-fork.pages.dev/
+Open **http://127.0.0.1:8787**. Set `ADMIN_KEY` and `BOT_INGEST_KEY` in `.dev.vars`, and `XAI_API_KEY` for Ask. Without a key, Ask reports that it is unavailable. Never commit `.dev.vars`.
 
-App and evidence: https://get-fork-demo.proud-wood-517d.workers.dev/
+```bash
+npm run check
+```
 
-Both use Northbound Studio account `718dee00a59bf7488ca530d0f80c465b`. Pages deploys `landing/` from `main`. The Worker uses `wrangler.worker.jsonc` explicitly, so the Pages build does not ingest the app's Worker configuration.
+This runs TypeScript checks, constraint tests, the production build and a Worker deployment dry run. GitHub Actions runs the same checks on pull requests and pushes to `main`.
+
+## Small stack, complete loop
+
+| Layer | Implementation |
+| --- | --- |
+| UI | Vite + TypeScript; three independent alternatives |
+| API | Hono on Cloudflare Workers |
+| State | D1: runs, decisions and model-call reservations |
+| Screenshots | Workers KV for new uploads; static assets for original captures |
+| AI | Server-side xAI calls with visible failures and a bounded demo budget |
+| Agent handoff | Grok Bot mission prompt + run-scoped ingestion token |
+| Coding workflow | Fork CLI and a Cursor command |
+| Hosting | Git-connected Cloudflare Pages landing + Worker application |
+
+Useful entry points: [`SPEC.md`](SPEC.md), [`bot/FORK_BOT.md`](bot/FORK_BOT.md), [`.cursor/commands/fork.md`](.cursor/commands/fork.md), [`src/worker.ts`](src/worker.ts), [`client/src`](client/src), [`evidence`](evidence).
+
+<details>
+<summary><strong>Deployment and operational details</strong></summary>
+
+The demo uses Northbound Studio's Cloudflare account. Pages builds `landing/` from `main`. The Worker explicitly uses `wrangler.worker.jsonc` so Pages does not ingest the application's Worker configuration.
 
 ```bash
 npm ci
@@ -45,20 +112,21 @@ npx wrangler d1 migrations apply fork-demo --remote -c wrangler.worker.jsonc
 npm run deploy
 ```
 
-Configure server secrets with `wrangler secret put XAI_API_KEY -c wrangler.worker.jsonc` (and ADMIN_KEY, BOT_INGEST_KEY). Never commit `.dev.vars`. Worker binding types are generated with `wrangler types src/worker-bindings.d.ts -c wrangler.worker.jsonc --include-runtime=false --strict-vars=false --env-interface=WorkerBindings`.
-
-D1 holds runs, immutable decision snapshots and model-call reservations. Workers KV holds new screenshot uploads; the original six captured screenshots ship as static assets. Original exports retain build `2026-09-30.1`; the snapshot fields were reconstructed from that build's committed source, and uncaptured finish/capture timestamps are not inferred.
-
-Ask uses the verified available `grok-4.20-0309-non-reasoning` model. The shared upstream timeout is twenty seconds: the original eight-second limit consistently expired before valid responses arrived. Upstream attempts are reserved before fetch and consume the configured 40-call demo budget even on failure. Ask failure is visible; no recommendations are substituted.
-
-Retry unsuccessful required runs from Runs after saving an admin session. These are new attempts linked to the original run; they never overwrite historical outcomes. New runs are queued until the operator hands their mission to Grok Bot.
-
-A decision recorded in the browser can be exported without creating a duplicate:
+Set `XAI_API_KEY`, `ADMIN_KEY` and `BOT_INGEST_KEY` with `wrangler secret put <name> -c wrangler.worker.jsonc`. Generate binding types with:
 
 ```bash
-PUBLIC_BASE_URL=https://get-fork-demo.proud-wood-517d.workers.dev node scripts/fork.mjs record --decision <id>
+npx wrangler types src/worker-bindings.d.ts -c wrangler.worker.jsonc \
+  --include-runtime=false --strict-vars=false --env-interface=WorkerBindings
 ```
 
-The export uses the decision's saved evidence snapshot. Adoption must succeed on the server before the CLI writes the repo target; the app highlights the adopted option and reads the committed default after redeployment.
+Upstream model attempts are reserved before fetch and count toward the 40-call demo budget even on failure. The shared deadline is 20 seconds; the initial eight-second deadline expired before valid responses arrived. Rate limits and per-run limits also apply. No substitute recommendations hide an upstream failure.
 
-Reviewed and completed by Mark Prethero via Codex on Mark MacBook.
+Retry unsuccessful required runs from Runs after saving an admin session. Retries create linked attempts. Queuing is not Bot execution: the operator must complete the handoff.
+
+Original exports retain build `2026-09-30.1`. Snapshot fields were reconstructed from that build's committed source; missing capture and finish timestamps are not inferred. Current visual examples use catalogue `2026-09-30.3`.
+
+</details>
+
+---
+
+Built at the Prague hackathon, September 2026. Continued and verified by **Mark Prethero · Codex · Mark MacBook**.

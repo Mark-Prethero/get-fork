@@ -6,7 +6,7 @@ export const brand = {
   sectionTitle: "How should this work?",
   lede: "Build the options. Inspect the evidence. Choose your direction.",
   footer: "Agent walkthroughs. Human judgment.",
-  demoBanner: "Demo catalogue · no booking or payment.",
+  demoBanner: "Shows and artwork from tickadoo · prices, times and suitability are demo scenarios, not live offers.",
   variants: {
     browse: {
       name: "Browse",

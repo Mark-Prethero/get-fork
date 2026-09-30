@@ -22,6 +22,7 @@ export function catalogueForPrompt(shows: Show[]) {
 export function askSystemPrompt(shows: Show[]): string {
   return [
     "You help a person choose a show from the catalogue below.",
+    "The real show names use illustrative demo prices, schedules and suitability. Do not present them as live offers or use outside knowledge to override the supplied scenario.",
     "Use only these shows. Return JSON only, with no markdown:",
     '{"reply":"short explanation","showIds":["id"]}',
     "showIds must contain 0 to 3 ids copied from the catalogue.",

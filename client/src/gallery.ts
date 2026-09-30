@@ -38,6 +38,12 @@ export function gallery(config: Config): string {
       <div class="cards">${cards}</div>
       <ul class="assumption-list">${assumptions}</ul>
     </section>
+    <section class="bot-feature">
+      <div><p class="kicker">Grok Bot · browser investigations</p>
+      <h2>Watch the options being explored.</h2>
+      <p>Inspect saved browser screenshots, factual steps and constraint receipts from the Grok Bot walkthroughs. These are recorded runs; live missions use an operator handoff.</p></div>
+      <a class="primary" href="/compare" data-link>Watch the walkthroughs →</a>
+    </section>
     <p class="foot">${esc(brand.footer)}</p>
     <p class="foot">${esc(config.evidenceLabel)}</p>
   `);

@@ -69,6 +69,7 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
       <h2>${esc(brand.sectionTitle)}</h2>
       <p class="lede">${esc(results.question)}</p>
       <p class="quiet">${esc(results.evidenceLabel)}</p>
+      <p class="note">Each walkthrough keeps its original build and catalogue. Earlier recordings use the invented-show catalogue; new runs use the tickadoo examples.</p>
       ${table(core, results)}
       <details>
         <summary>The Group Organiser, when those runs exist</summary>
@@ -157,7 +158,7 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
     const current = shots[shot];
     const final = detail?.outcome?.final;
     host.innerHTML = `
-      <p class="kicker">Recorded agent run</p>
+      <p class="kicker">Recorded browser investigation</p>
       <h2>${esc(selected.profileId)} · ${esc(selected.variantId)}</h2>
       <p>Status: ${esc(selected.status)}. Build ${esc(selected.buildId ?? results.buildId)}. ${esc(selected.deviceLabel ?? "Device: Not captured.")}</p>
       <p>${selected.missionPassed === null || selected.missionPassed === undefined ? "Constraints: Not captured." : selected.missionPassed ? "Mission constraints passed." : "Mission constraints failed."} ${selected.showTitle ? `· ${esc(selected.showTitle)}` : ""}</p>
@@ -167,7 +168,7 @@ export async function renderCompare(root: HTMLElement): Promise<() => void> {
         <button class="ghost" type="button" data-play ${shots.length < 2 ? "disabled" : ""}>${playing ? "Pause" : "Play"}</button>
         <button class="ghost" type="button" data-restart ${!shots.length ? "disabled" : ""}>Restart</button>
       </div>
-      <p class="quiet">Screenshot replay. Playback does not change the run.</p>
+      <p class="quiet">Saved screenshots and factual actions. Playback does not change the run. Live Grok Bot missions are dispatched from Runs.</p>
       ${final?.evaluation ? final.evaluation.constraints.map((item) => `<div class="constraint"><span>${esc(item.label)} — ${esc(item.detail)}</span><span class="${item.pass ? "pass" : "fail"}">${item.pass ? "Pass" : "Fail"}</span></div>`).join("") : ""}
       ${(detail?.observations ?? []).map((item) => `<h3>Trace</h3><p>${esc(item.trace)}</p>${item.commentary.map((remark) => `<p><strong>Remark.</strong> ${esc(remark.text)}</p>`).join("")}`).join("")}
       <ol>${(detail?.events ?? []).map((event) => `<li>${esc(event.recordedAt)} · ${esc(event.type)}</li>`).join("")}</ol>

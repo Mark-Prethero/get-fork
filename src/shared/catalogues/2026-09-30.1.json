@@ -1,0 +1,244 @@
+[
+  {
+    "id": "hold-for-applause",
+    "title": "Hold for Applause",
+    "genre": "comedy",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "19:00",
+    "priceGbp": 29,
+    "runtimeMins": 80,
+    "minAge": 0,
+    "dateSuitable": true,
+    "vibeTags": [
+      "laugh-out-loud",
+      "bright"
+    ],
+    "description": "A short comic set about waiting in a theatre bar for a night that might still happen.",
+    "posterColour": "#1C1C1C"
+  },
+  {
+    "id": "uninvited-plus-one",
+    "title": "The Uninvited Plus-One",
+    "genre": "comedy",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "19:30",
+    "priceGbp": 45,
+    "runtimeMins": 110,
+    "minAge": 12,
+    "dateSuitable": true,
+    "vibeTags": [
+      "laugh-out-loud",
+      "romantic"
+    ],
+    "description": "Two people attend the wrong wedding reception and decide to stay for the speeches.",
+    "posterColour": "#2A2A28"
+  },
+  {
+    "id": "interval-drinks",
+    "title": "Interval Drinks",
+    "genre": "comedy",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "20:00",
+    "priceGbp": 50,
+    "runtimeMins": 100,
+    "minAge": 12,
+    "dateSuitable": true,
+    "vibeTags": [
+      "laugh-out-loud"
+    ],
+    "description": "The entire plot takes place in the queue for a warm white wine.",
+    "posterColour": "#3A3A36"
+  },
+  {
+    "id": "please-laugh",
+    "title": "Please Laugh Responsibly",
+    "genre": "comedy",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "18:30",
+    "priceGbp": 38,
+    "runtimeMins": 95,
+    "minAge": 8,
+    "dateSuitable": true,
+    "vibeTags": [
+      "laugh-out-loud"
+    ],
+    "description": "A meticulous person attempts to schedule spontaneity for a first night out.",
+    "posterColour": "#4A4A45"
+  },
+  {
+    "id": "two-tickets",
+    "title": "Two Tickets, One Excuse",
+    "genre": "comedy",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "19:45",
+    "priceGbp": 68,
+    "runtimeMins": 125,
+    "minAge": 15,
+    "dateSuitable": true,
+    "vibeTags": [
+      "laugh-out-loud",
+      "awkward"
+    ],
+    "description": "A date survives a missed cue, a swapped coat, and one honest conversation.",
+    "posterColour": "#5C5C56"
+  },
+  {
+    "id": "standing-ovation",
+    "title": "Standing Ovation, Sitting Argument",
+    "genre": "comedy",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "20:15",
+    "priceGbp": 72,
+    "runtimeMins": 160,
+    "minAge": 14,
+    "dateSuitable": true,
+    "vibeTags": [
+      "laugh-out-loud"
+    ],
+    "description": "A couple disagrees about whether the show they are in is any good.",
+    "posterColour": "#6E6A62"
+  },
+  {
+    "id": "black-tie",
+    "title": "Black Tie, Bright Lights",
+    "genre": "musical",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "19:30",
+    "priceGbp": 76,
+    "runtimeMins": 145,
+    "minAge": 12,
+    "dateSuitable": true,
+    "vibeTags": [
+      "laugh-out-loud",
+      "glamorous"
+    ],
+    "description": "Songs about dressing up for an evening that keeps getting funnier.",
+    "posterColour": "#221F1C"
+  },
+  {
+    "id": "aunt-june",
+    "title": "Aunt June's Last Question",
+    "genre": "play",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "19:15",
+    "priceGbp": 48,
+    "runtimeMins": 130,
+    "minAge": 15,
+    "dateSuitable": true,
+    "vibeTags": [
+      "witty"
+    ],
+    "description": "A family answers one precise question and discovers they heard it differently.",
+    "posterColour": "#33302C"
+  },
+  {
+    "id": "quiet-after",
+    "title": "The Quiet After",
+    "genre": "drama",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "19:00",
+    "priceGbp": 55,
+    "runtimeMins": 140,
+    "minAge": 12,
+    "dateSuitable": true,
+    "vibeTags": [
+      "intimate"
+    ],
+    "description": "A still evening between two people who already know the ending.",
+    "posterColour": "#45423C"
+  },
+  {
+    "id": "dinner-half-eight",
+    "title": "Dinner at Half Eight",
+    "genre": "comedy",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "20:30",
+    "priceGbp": 92,
+    "runtimeMins": 100,
+    "minAge": 16,
+    "dateSuitable": true,
+    "vibeTags": [
+      "laugh-out-loud"
+    ],
+    "description": "A reserved table, an expensive menu, and a joke that arrives with the bill.",
+    "posterColour": "#171717"
+  },
+  {
+    "id": "neon-interval",
+    "title": "Neon Interval",
+    "genre": "musical",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "19:45",
+    "priceGbp": 85,
+    "runtimeMins": 150,
+    "minAge": 8,
+    "dateSuitable": true,
+    "vibeTags": [
+      "spectacle"
+    ],
+    "description": "A bright company musical with a long finale and no particular punchline.",
+    "posterColour": "#2C2C2C"
+  },
+  {
+    "id": "matinee-brave",
+    "title": "Matinee for the Brave",
+    "genre": "comedy",
+    "tonight": false,
+    "whenLabel": "Tomorrow",
+    "time": "14:00",
+    "priceGbp": 40,
+    "runtimeMins": 90,
+    "minAge": 5,
+    "dateSuitable": false,
+    "vibeTags": [
+      "laugh-out-loud"
+    ],
+    "description": "A daytime comic adventure that is not on tonight.",
+    "posterColour": "#58584F"
+  },
+  {
+    "id": "fifteen-year-pause",
+    "title": "The Fifteen-Year Pause",
+    "genre": "comedy",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "20:00",
+    "priceGbp": 50,
+    "runtimeMins": 150,
+    "minAge": 16,
+    "dateSuitable": false,
+    "vibeTags": [
+      "dry"
+    ],
+    "description": "A tightly timed comedy restricted to audiences of 16 and over.",
+    "posterColour": "#3E3E3A"
+  },
+  {
+    "id": "second-house",
+    "title": "Second House Left",
+    "genre": "drama",
+    "tonight": true,
+    "whenLabel": "Tonight",
+    "time": "19:30",
+    "priceGbp": 36,
+    "runtimeMins": 170,
+    "minAge": 18,
+    "dateSuitable": false,
+    "vibeTags": [
+      "dark"
+    ],
+    "description": "A long, adult drama in a rented room above a closed shop.",
+    "posterColour": "#101010"
+  }
+]

@@ -35,10 +35,11 @@ export function shell(current: string, body: string): string {
 
 export function showCard(show: Show): string {
   return `<article class="show">
-    <div class="swatch" style="background:${esc(show.posterColour)}"></div>
+    ${show.imageUrl ? `<div class="show-art"><img src="${esc(show.imageUrl)}" alt="${esc(show.title)} artwork from tickadoo" width="960" height="540" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></div>` : `<div class="swatch" style="background:${esc(show.posterColour)}"></div>`}
     <p class="genre">${esc(show.genre)}</p>
     <h3>${esc(show.title)}</h3>
     <p>${esc(show.description)}</p>
+    <p class="scenario-label">Demo scenario</p>
     <div class="meta">
       <div><span>${esc(show.whenLabel)}</span><span>${esc(show.time)}</span></div>
       <div>${formatGbp(show.priceGbp)}</div>
@@ -47,6 +48,7 @@ export function showCard(show: Show): string {
       <div>${show.dateSuitable ? "For a date" : "Not a date"}</div>
       <div>${esc(show.vibeTags.join(", "))}</div>
     </div>
+    ${show.sourceUrl ? `<a class="show-source" href="${esc(show.sourceUrl)}" target="_blank" rel="noopener noreferrer">Show on tickadoo ↗</a>` : ""}
     <button class="primary" type="button" data-choose="${esc(show.id)}">Choose this show</button>
   </article>`;
 }

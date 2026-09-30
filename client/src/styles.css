@@ -124,3 +124,12 @@ summary { cursor: pointer; min-height: 48px; display: flex; align-items: center;
 
 .frame.mobile .shows { grid-template-columns: 1fr; }
 .frame.mobile .composer { flex-wrap: wrap; }
+
+.show-art { aspect-ratio: 16 / 9; margin: -16px -16px 6px; background: #171717; overflow: hidden; }
+.show-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.scenario-label { margin: 4px 0 0; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.show-source { font-size: 13px; color: var(--muted); align-self: flex-start; margin-bottom: 6px; }
+.bot-feature { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; padding: 24px; margin: 26px 0; border: 1px solid var(--line); background: var(--soft); }
+.bot-feature h2 { margin: 0 0 8px; }
+.bot-feature p { max-width: 62ch; margin: 0; }
+.bot-feature a { display: inline-flex; align-items: center; text-decoration: none; }

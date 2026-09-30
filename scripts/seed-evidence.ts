@@ -3,7 +3,7 @@ import { readdir, readFile, writeFile } from "node:fs/promises";
 import { forkConfig, assumptionFor } from "../src/shared/config.ts";
 import { profileCopy } from "../src/shared/brand.ts";
 import { missions } from "../src/shared/evaluate.ts";
-import { shows } from "../src/shared/shows.ts";
+import shows from "../src/shared/catalogues/2026-09-30.1.json" with { type: "json" };
 const quote = (value: unknown) => value === null || value === undefined ? "NULL" : `'${String(value).replaceAll("'", "''")}'`;
 const insert = (table: string, row: Record<string, unknown>) => `INSERT OR IGNORE INTO ${table} (${Object.keys(row).join(",")}) VALUES (${Object.values(row).map(quote).join(",")});`;
 const sql = ["-- Original Cursor walkthrough exports. Snapshot reconstructed from the matching committed source."];

@@ -20,30 +20,30 @@ test("configuration is valid and keeps three demo variants", () => {
 test("date night has several valid shows and near misses", () => {
   const passing = idsPassing("date-night", false);
   assert.ok(passing.length >= 3);
-  assert.ok(passing.includes("interval-drinks"));
-  assert.ok(passing.includes("black-tie"));
-  assert.equal(passing.includes("dinner-half-eight"), false);
-  assert.equal(passing.includes("matinee-brave"), false);
-  assert.equal(passing.includes("aunt-june"), false);
-  assert.equal(passing.includes("quiet-after"), false);
+  assert.ok(passing.includes("the-comedy-about-spies"));
+  assert.ok(passing.includes("mamma-mia"));
+  assert.equal(passing.includes("wicked"), false);
+  assert.equal(passing.includes("matilda-the-musical"), false);
+  assert.equal(passing.includes("the-mousetrap"), false);
+  assert.equal(passing.includes("witness-for-the-prosecution"), false);
 });
 
 test("group mission and the £50 twist each have a valid show", () => {
   const atEighty = idsPassing("group-night", false);
   const atFifty = idsPassing("group-night", true);
-  assert.ok(atEighty.includes("two-tickets"));
-  assert.equal(atEighty.includes("standing-ovation"), false);
-  assert.ok(atFifty.includes("hold-for-applause"));
-  assert.ok(atFifty.includes("interval-drinks"));
-  assert.equal(atFifty.includes("two-tickets"), false);
-  assert.equal(atFifty.includes("quiet-after"), false);
+  assert.ok(atEighty.includes("faulty-towers-dining-experience"));
+  assert.equal(atEighty.includes("the-book-of-mormon"), false);
+  assert.ok(atFifty.includes("the-play-that-goes-wrong"));
+  assert.ok(atFifty.includes("the-comedy-about-spies"));
+  assert.equal(atFifty.includes("faulty-towers-dining-experience"), false);
+  assert.equal(atFifty.includes("witness-for-the-prosecution"), false);
 });
 
 test("boundaries are exact and invalid ids fail closed", () => {
   const price = missions["date-night"];
   assert.ok(price);
   const eighty: Show = {
-    ...showById("hold-for-applause")!,
+    ...showById("the-play-that-goes-wrong")!,
     id: "exact-eighty",
     priceGbp: 80,
   };
@@ -54,7 +54,7 @@ test("boundaries are exact and invalid ids fail closed", () => {
   const group = missions["group-night"];
   assert.ok(group);
   const twisted = applyTwist(group, true);
-  const fifty: Show = { ...showById("interval-drinks")!, priceGbp: 50, runtimeMins: 150, minAge: 15 };
+  const fifty: Show = { ...showById("the-comedy-about-spies")!, priceGbp: 50, runtimeMins: 150, minAge: 15 };
   const fiftyOne: Show = { ...fifty, priceGbp: 51 };
   assert.equal(evaluateShow(fifty, twisted).passed, true);
   assert.equal(evaluateShow(fiftyOne, twisted).passed, false);

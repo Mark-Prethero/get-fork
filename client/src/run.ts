@@ -1,3 +1,4 @@
+import { brand } from "@shared/brand.ts";
 import type { Show } from "@shared/shows.ts";
 import { api, runToken, saveRunToken } from "./api.ts";
 import { mountExplore } from "./explore.ts";
@@ -103,6 +104,7 @@ function drawVariant(root: HTMLElement, card: FullRun, token: string, twistMode:
   root.innerHTML = shell("", `
     ${missionCard(card, twistMode ? `<p>${esc(card.twist?.prompt ?? "")}</p>` : "")}
     <p class="device-label">${esc(card.device?.label ?? card.deviceLabel)} · build ${esc(card.buildId)}</p>
+    <p class="banner">${esc(brand.demoBanner)}</p>
     <div class="frame ${card.deviceMode === "mobile-emulation" ? "mobile" : ""}" data-variant></div>
     ${traceFields(true)}
   `);
