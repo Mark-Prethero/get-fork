@@ -3,6 +3,8 @@ import { flowSteps } from "./flow.ts";
 import { brand } from "@shared/brand.ts";
 import { esc, icon, mark, shell } from "./render.ts";
 
+export const CURSOR_START_PROMPT = "/fork How should people find their next show? Compare browse, ask and a guided flow. Build working alternatives, give me the Fork preview and Grok Bot missions, then wait for my decision before adoption.";
+
 interface Config {
   question: string;
   evidenceLabel: string;
@@ -26,11 +28,13 @@ export function gallery(config: Config): string {
         <div class="lockup">${mark("mark large")}<span class="word">${brand.wordmark}</span></div>
         <p class="kicker">Any product. A better decision.</p>
         <h1>Explore the options.<br>Choose what ships.</h1>
-        <p class="lede">Configure Fork around your product question, working alternatives and test missions. Grok Bot explores; you decide; Cursor keeps building.</p>
-        <a class="primary pitch-start" href="/v/ask" data-link>Start the 60-second demo →</a>
+        <p class="lede">Start with /fork in Cursor. Build working alternatives for your product question. Grok Bot explores; you decide; Cursor keeps building.</p>
+        <a class="primary pitch-start" href="/pitch" data-link>See the one-minute pitch →</a>
       </div>
-      <aside class="plaque">${mark("mark")}<p>${esc(brand.plaque)}</p></aside>
+      <aside class="cursor-start"><p class="kicker">01 · Start in Cursor</p><h2>A product question.<br>One command.</h2><pre><code>/fork How should people find
+their next show?</code></pre><p>Open this repo in Cursor, type <strong>/fork</strong> in chat, then add your question.</p><div class="row"><button class="primary" type="button" data-copy-start>Copy Cursor prompt</button><a href="https://github.com/Mark-Prethero/get-fork/blob/main/.cursor/commands/fork.md" target="_blank" rel="noopener noreferrer">View the command ↗</a></div><p class="copy-start-status" role="status"></p></aside>
     </section>
+    <div class="cursor-loop" aria-label="Cursor workflow"><span><strong>Cursor</strong> Frame & build</span><span aria-hidden="true">→</span><span><strong>Fork</strong> Try alternatives</span><span aria-hidden="true">→</span><span><strong>Grok Bot</strong> Investigate</span><span aria-hidden="true">→</span><span><strong>Cursor</strong> Continue with your choice</span></div>
     <div class="product-context"><strong>One workflow. Any product.</strong><span>Checkout · Onboarding · Search · Pricing</span><p>This demo uses show discovery to make the alternatives tangible.</p></div>
     ${flowSteps(0)}
     <section class="interface">
@@ -50,4 +54,18 @@ export function gallery(config: Config): string {
     <p class="foot">${esc(brand.footer)}</p>
     <p class="foot">${esc(config.evidenceLabel)}</p>
   `);
+}
+
+export function bindGallery(root: HTMLElement): () => void {
+  const button = root.querySelector("[data-copy-start]");
+  let active = true;
+  const copy = () => {
+    void navigator.clipboard.writeText(CURSOR_START_PROMPT).then(() => {
+      if (active) { const status = root.querySelector(".copy-start-status"); if (status) status.textContent = "Copied. Paste into Cursor chat in this repo."; }
+    }).catch(() => {
+      if (active) { const status = root.querySelector(".copy-start-status"); if (status) status.textContent = "Type /fork in Cursor chat, then add your product question."; }
+    });
+  };
+  button?.addEventListener("click", copy);
+  return () => { active = false; button?.removeEventListener("click", copy); };
 }

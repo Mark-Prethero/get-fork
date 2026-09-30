@@ -24,6 +24,7 @@ export function shell(current: string, body: string): string {
     <header class="top">
       <a class="brand" href="/" data-link>${mark()}<span>${brand.wordmark}</span></a>
       <nav class="nav">
+        <a href="/pitch" data-link ${current === "pitch" ? 'aria-current="page"' : ""}>Pitch</a>
         <a href="/" data-link ${current === "home" ? 'aria-current="page"' : ""}>Options</a>
         <a href="/compare" data-link ${current === "compare" ? 'aria-current="page"' : ""}>Evidence</a>
         <a href="/admin" data-link ${current === "admin" ? 'aria-current="page"' : ""}>Runs</a>

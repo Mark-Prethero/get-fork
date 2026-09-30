@@ -4,8 +4,9 @@ import { renderAdmin } from "./admin.ts";
 import { renderCompare } from "./compare.ts";
 import { mountExplore } from "./explore.ts";
 import { selection } from "./flow.ts";
+import { pitch } from "./pitch.ts";
 import { walkthrough } from "./walkthrough.ts";
-import { gallery } from "./gallery.ts";
+import { bindGallery, gallery } from "./gallery.ts";
 import { esc } from "./render.ts";
 import { renderRun } from "./run.ts";
 import type { Show } from "@shared/shows.ts";
@@ -26,6 +27,10 @@ async function render(): Promise<void> {
       const config = await api<{ question: string; evidenceLabel: string; adopted: { variantId: string } | null }>("/api/config");
       if (version !== renderVersion) return;
       root.innerHTML = gallery(config);
+      dispose = bindGallery(root);
+    } else if (path === "/pitch") {
+      root.innerHTML = pitch();
+      dispose = bindGallery(root);
     } else if (path === "/selection") {
       const config = await api<{ shows: Show[] }>("/api/config");
       if (version !== renderVersion) return;

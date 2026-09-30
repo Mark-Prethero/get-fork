@@ -37,12 +37,27 @@ This repo is a working show-discovery example. To adapt it, update `fork.config.
 
 Nine real tickadoo show names and public artwork make the alternatives tangible. Cards link to their tickadoo source. Prices, times, ages and suitability are labelled **demo scenarios**, rather than live inventory.
 
+## Start from Cursor
+
+Open this repository in Cursor. In the Agent chat, select `/fork` and add your product question:
+
+```text
+/fork How should people find their next show? Compare browse, ask and a guided flow.
+```
+
+The repo includes the actual [Cursor command](.cursor/commands/fork.md) and an [always-on rule](.cursor/rules/fork.mdc). The command tells Cursor to read prior decisions, propose a shortlist, build the approved alternatives, validate previews and generate the Grok Bot mission handoff. Fork does not automatically remote-control Cursor or dispatch into the Grok Bot app: the operator transfers the mission. After the investigation, the human choice becomes a Cursor handoff; authenticated recording and explicit adoption update repository context.
+
 ## The 60-second pitch
 
-1. **Explore:** open [Ask](https://get-fork-demo.proud-wood-517d.workers.dev/v/ask), click the Date night example, then choose a show. The other alternatives remain one tab away.
-2. **Watch:** follow Watch Grok Bot to the [real walkthroughs](https://get-fork-demo.proud-wood-517d.workers.dev/walkthrough). Three correctly named chats in the Grok Bot app provide the original reports. Detailed recorded evidence is available separately.
-3. **Decide:** choose, revise or defer an approach and explain why. Public visitors create a draft; an authenticated operator records the decision with an immutable evidence snapshot.
-4. **Continue building:** copy or download the Cursor handoff. It includes the reason, evidence links and next steps. Recorded decisions can be exported and adopted with the CLI.
+Open the [one-minute pitch view](https://get-fork-demo.proud-wood-517d.workers.dev/pitch). It tells the story with completed Bot findings; a fresh investigation is not needed on stage. The live alternatives, original Bot captures and decision handoff are available from that view for questions.
+
+Optional working walkthrough:
+
+1. **Start:** show the `/fork` prompt on the homepage: Cursor frames and builds the alternatives.
+2. **Explore:** open [Ask](https://get-fork-demo.proud-wood-517d.workers.dev/v/ask), click the Date night example, then choose a show. The other alternatives remain one tab away.
+3. **Watch:** follow Watch Grok Bot to the [real walkthroughs](https://get-fork-demo.proud-wood-517d.workers.dev/walkthrough). Three correctly named chats in the Grok Bot app provide the original reports. Detailed recorded evidence is available separately.
+4. **Decide:** choose, revise or defer an approach and explain why. Public visitors create a draft; an authenticated operator records the decision with an immutable evidence snapshot.
+5. **Continue building:** copy or download the Cursor handoff. It includes the reason, evidence links and next steps. Recorded decisions can be exported and adopted with the CLI.
 
 ## Fresh Grok Bot walkthrough
 
