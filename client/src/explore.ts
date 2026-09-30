@@ -93,17 +93,22 @@ function mountAsk(root: HTMLElement, ctx: ExploreContext, paint: (body: string) 
       <div class="thread">${messages.map((message) => `<div class="bubble ${message.role}">${esc(message.content)}</div>`).join("")}</div>
       <form class="composer">
         <textarea name="message" aria-label="Your request" maxlength="400" placeholder="A funny show tonight, for a date, under £80."></textarea>
-        <button class="primary" type="submit">Send</button>
+        <button class="primary" type="button" data-send>Send</button>
       </form>
       <p class="note" data-status>${esc(status)}</p>
       <div class="shows">${cards.map(showCard).join("")}</div>
     `);
-    root.querySelector("form")?.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const form = event.currentTarget as HTMLFormElement;
+    const sendFromForm = () => {
+      const form = root.querySelector<HTMLFormElement>(".composer");
+      if (!form) return;
       const message = String(new FormData(form).get("message") ?? "").trim();
       if (!message) return;
       void send(message);
+    };
+    root.querySelector("[data-send]")?.addEventListener("click", sendFromForm);
+    root.querySelector(".composer")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      sendFromForm();
     });
     bindChoose(root, ctx);
   };

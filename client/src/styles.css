@@ -73,7 +73,8 @@ h2 { margin: 0; font-size: 40px; line-height: 1.05; letter-spacing: -0.04em; fon
 .thread { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
 .bubble { max-width: 68ch; padding: 12px 14px; border: 1px solid var(--line); }
 .bubble.user { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.composer { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
+.composer { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.composer .primary { justify-self: start; min-width: 160px; }
 textarea { width: 100%; min-height: 96px; padding: 12px; border: 1px solid var(--line); background: transparent; resize: vertical; }
 .note { color: var(--muted); font-size: 14px; }
 .steps { margin-top: 8px; color: var(--muted); font-size: 14px; }

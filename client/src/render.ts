@@ -44,6 +44,8 @@ export function showCard(show: Show): string {
       <div>${formatGbp(show.priceGbp)}</div>
       <div>${show.runtimeMins} min</div>
       <div>${show.minAge === 0 ? "All ages" : `Age ${show.minAge}+`}</div>
+      <div>${show.dateSuitable ? "For a date" : "Not a date"}</div>
+      <div>${esc(show.vibeTags.join(", "))}</div>
     </div>
     <button class="primary" type="button" data-choose="${esc(show.id)}">Choose this show</button>
   </article>`;

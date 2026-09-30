@@ -1,0 +1,103 @@
+{
+  "runId": "ee71c2ca-c202-4fab-9beb-4a7b5d5291bc",
+  "profileId": "speedrunner",
+  "variantId": "ask",
+  "status": "error",
+  "buildId": "2026-09-30.1",
+  "device": {
+    "mode": "mobile-emulation",
+    "label": "Mobile emulation",
+    "target": {
+      "width": 390,
+      "height": 844
+    },
+    "outerViewport": {
+      "width": 1814,
+      "height": 1011
+    },
+    "frame": {
+      "width": 390,
+      "height": 844
+    },
+    "textScale": 1,
+    "resizeSupported": false,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+  },
+  "outcome": {
+    "final": {
+      "outcome": "error",
+      "showId": null,
+      "showTitle": null,
+      "reason": "Started Ask variant in Mobile emulation (390×844 viewport, text scale 1). Typed: \"A funny show tonight for a date, at most £80 per person.\" Clicked Send. Status line below Send button displayed: \"Ask is unavailable. XAI_API_KEY is not configured.\" Infrastructure error prevented completing the task.",
+      "evaluation": null,
+      "twistApplied": false,
+      "agentTimingSeconds": 252,
+      "timingLabel": "Agent timing"
+    }
+  },
+  "events": [
+    {
+      "id": "f6a49e61-ccf7-4810-8342-1459959761ce",
+      "clientEventId": "cd7ceea8-332a-4e10-9daa-3cbecb33776a",
+      "type": "start",
+      "payload": {
+        "mode": "mobile-emulation",
+        "label": "Mobile emulation",
+        "target": {
+          "width": 390,
+          "height": 844
+        },
+        "outerViewport": {
+          "width": 1814,
+          "height": 1011
+        },
+        "frame": {
+          "width": 390,
+          "height": 844
+        },
+        "textScale": 1,
+        "resizeSupported": false,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+      },
+      "recordedAt": "2026-09-30T13:10:11.312Z",
+      "sequence": 1
+    },
+    {
+      "id": "d669e1e1-e703-456e-bc35-3264aef40d1e",
+      "clientEventId": "bab156b4-9465-4493-a6d0-67fbd7de46fb",
+      "type": "chat",
+      "payload": {
+        "role": "user",
+        "content": "A funny show tonight for a date, at most £80 per person."
+      },
+      "recordedAt": "2026-09-30T13:12:29.534Z",
+      "sequence": 2
+    },
+    {
+      "id": "03b576d3-dad8-470d-bef5-0879506934e0",
+      "clientEventId": "0ea322b0-39ad-4d36-8a79-769741a48cb3",
+      "type": "ask_error",
+      "payload": {
+        "message": "Ask is unavailable. XAI_API_KEY is not configured."
+      },
+      "recordedAt": "2026-09-30T13:12:29.553Z",
+      "sequence": 3
+    }
+  ],
+  "observations": [
+    {
+      "id": "fdf143dc-efa4-4de8-9088-d979f72e6e0e",
+      "trace": "Started Ask variant in Mobile emulation (390×844 viewport, text scale 1). Typed: \"A funny show tonight for a date, at most £80 per person.\" Clicked Send. Status line below Send button displayed: \"Ask is unavailable. XAI_API_KEY is not configured.\" Infrastructure error prevented completing the task.",
+      "commentary": [],
+      "createdAt": "2026-09-30T13:14:11.428Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "d0e35f75-31ac-4dd5-adca-0dd31f736416",
+      "description": "Error state",
+      "file": "d0e35f75-31ac-4dd5-adca-0dd31f736416.png",
+      "missing": false
+    }
+  ]
+}

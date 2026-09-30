@@ -1,0 +1,181 @@
+{
+  "runId": "865a6e25-cf03-4ed2-84a3-219b70622d43",
+  "profileId": "planner",
+  "variantId": "guide",
+  "status": "completed",
+  "buildId": "2026-09-30.1",
+  "device": {
+    "mode": "desktop",
+    "label": "Layout preview · target 1440×900 · actual 1814×1011",
+    "target": {
+      "width": 1440,
+      "height": 900
+    },
+    "outerViewport": {
+      "width": 1814,
+      "height": 1011
+    },
+    "frame": {
+      "width": 1814,
+      "height": 1011
+    },
+    "textScale": 1.25,
+    "resizeSupported": false,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+  },
+  "outcome": {
+    "final": {
+      "outcome": "selected",
+      "showId": "hold-for-applause",
+      "showTitle": "Hold for Applause",
+      "reason": null,
+      "evaluation": {
+        "passed": true,
+        "constraints": [
+          {
+            "kind": "tonight",
+            "label": "Tonight",
+            "pass": true,
+            "detail": "Hold for Applause is listed tonight."
+          },
+          {
+            "kind": "funny",
+            "label": "Funny",
+            "pass": true,
+            "detail": "Comedy, or tagged laugh-out-loud."
+          },
+          {
+            "kind": "max-price",
+            "label": "At most £80 per person",
+            "pass": true,
+            "detail": "£29 against a maximum of £80."
+          },
+          {
+            "kind": "date-suitable",
+            "label": "Suitable for a date",
+            "pass": true,
+            "detail": "Marked suitable for a date."
+          }
+        ]
+      },
+      "twistApplied": false,
+      "agentTimingSeconds": 150,
+      "timingLabel": "Agent timing"
+    }
+  },
+  "events": [
+    {
+      "id": "551374b8-01e0-4539-99e6-8b18ec792eda",
+      "clientEventId": "ed802fcb-0103-4fce-b7dd-f91aa8c597e8",
+      "type": "start",
+      "payload": {
+        "mode": "desktop",
+        "label": "Layout preview · target 1440×900 · actual 1814×1011",
+        "target": {
+          "width": 1440,
+          "height": 900
+        },
+        "outerViewport": {
+          "width": 1814,
+          "height": 1011
+        },
+        "frame": {
+          "width": 1814,
+          "height": 1011
+        },
+        "textScale": 1.25,
+        "resizeSupported": false,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+      },
+      "recordedAt": "2026-09-30T13:03:04.585Z",
+      "sequence": 1
+    },
+    {
+      "id": "f9c60f32-49ef-406e-8fe9-c4d79dd16540",
+      "clientEventId": "277fe836-49aa-48c0-a0d5-e731a7be980c",
+      "type": "guide_step",
+      "payload": {
+        "step": "when",
+        "value": "tonight"
+      },
+      "recordedAt": "2026-09-30T13:03:42.327Z",
+      "sequence": 2
+    },
+    {
+      "id": "b1473fa0-420f-48f5-a233-d725200a2fc7",
+      "clientEventId": "293d811b-3ac0-4d11-8b70-ac9b66ebd926",
+      "type": "guide_step",
+      "payload": {
+        "step": "budget",
+        "value": "80"
+      },
+      "recordedAt": "2026-09-30T13:03:52.966Z",
+      "sequence": 3
+    },
+    {
+      "id": "4004a478-b74f-40c3-b8fe-a740a5ffcc8b",
+      "clientEventId": "2dfec6d2-f3c2-4c51-a338-265104ffdb78",
+      "type": "guide_step",
+      "payload": {
+        "step": "party",
+        "value": "date"
+      },
+      "recordedAt": "2026-09-30T13:04:15.545Z",
+      "sequence": 4
+    },
+    {
+      "id": "1d285f29-0fef-4da1-9b13-e9ccadb1895d",
+      "clientEventId": "0be3b006-80d6-4be8-b02f-604086d170f1",
+      "type": "guide_step",
+      "payload": {
+        "step": "mood",
+        "value": "funny"
+      },
+      "recordedAt": "2026-09-30T13:04:29.292Z",
+      "sequence": 5
+    },
+    {
+      "id": "fb0de378-5364-472d-9e91-83927a6a1c32",
+      "clientEventId": "a5af8e70-eeaa-4391-b25c-2469d3d7dd5f",
+      "type": "guide_step",
+      "payload": {
+        "step": "runtime",
+        "value": "150"
+      },
+      "recordedAt": "2026-09-30T13:04:38.372Z",
+      "sequence": 6
+    },
+    {
+      "id": "df350dcf-15a0-4fae-ac5e-fd54cf1dd4e9",
+      "clientEventId": "4efca5de-f443-4e80-abf1-bce6339b3dac",
+      "type": "choose",
+      "payload": {
+        "showId": "hold-for-applause"
+      },
+      "recordedAt": "2026-09-30T13:05:34.689Z",
+      "sequence": 7
+    }
+  ],
+  "observations": [
+    {
+      "id": "e3225c8a-2aa8-4f27-b231-da005d42da14",
+      "trace": "Started Guide variant. Step 1: Selected \"Tonight\". Step 2: Selected \"£80\". Step 3: Selected \"A date\". Step 4: Selected \"Something funny\". Step 5: Selected \"150 minutes or less\". Four matching shows appeared: Hold for Applause (£29, 80 min), The Uninvited Plus-One (£45, 110 min), Interval Drinks (£50, 100 min), Please Laugh Responsibly (£38, 95 min). Chose \"Hold for Applause\" as it met all criteria: comedy, tonight, £29 (under £80), 80 minutes (under 150), for a date. Receipt showed all constraints passed.",
+      "commentary": [],
+      "createdAt": "2026-09-30T13:08:17.381Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "78644a21-da15-466b-83f0-d1ec7ee83194",
+      "description": "Initial state",
+      "file": "78644a21-da15-466b-83f0-d1ec7ee83194.png",
+      "missing": false
+    },
+    {
+      "id": "bc39085e-1cc6-4742-a60c-76877a5c91fb",
+      "description": "Final state",
+      "file": "bc39085e-1cc6-4742-a60c-76877a5c91fb.png",
+      "missing": false
+    }
+  ]
+}

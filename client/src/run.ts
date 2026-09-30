@@ -68,7 +68,8 @@ export async function renderRun(root: HTMLElement, runId: string): Promise<void>
     return;
   }
   if (full.outcome?.final || ["completed", "blocked", "timed_out", "error", "unsupported"].includes(full.status)) {
-    root.innerHTML = shell("", missionCard(full, receipt(full)));
+    root.innerHTML = shell("", missionCard(full, `${receipt(full)}${traceFields(false)}`));
+    bindTrace(root, full.id, token, false);
     return;
   }
   if (full.status === "queued") {
@@ -95,18 +96,7 @@ function drawVariant(root: HTMLElement, card: FullRun, token: string, twistMode:
     ${missionCard(card, twistMode ? `<p>${esc(card.twist?.prompt ?? "")}</p>` : "")}
     <p class="device-label">${esc(card.device?.label ?? card.deviceLabel)} · build ${esc(card.buildId)}</p>
     <div class="frame ${card.deviceMode === "mobile-emulation" ? "mobile" : ""}" data-variant></div>
-    <form class="form" data-report>
-      <label for="trace">Factual trace</label>
-      <textarea id="trace" name="trace" maxlength="4000" placeholder="What happened, in order."></textarea>
-      <label for="remark">Remark, only if an event supports it</label>
-      <input id="remark" name="remark" type="text" maxlength="240" />
-      <label for="shot">Screenshot</label>
-      <input id="shot" name="shot" type="file" accept="image/png,image/jpeg,image/webp" />
-      <button class="ghost" type="submit">Save trace</button>
-      <button class="ghost" type="button" data-block>Record a blocker</button>
-      <button class="ghost" type="button" data-error>Record an error</button>
-    </form>
-    <p class="note" data-report-status></p>
+    ${traceFields(true)}
   `);
   void configPromise.then((config) => {
     const host = root.querySelector<HTMLElement>("[data-variant]");
@@ -122,6 +112,24 @@ function drawVariant(root: HTMLElement, card: FullRun, token: string, twistMode:
       onChoose: (showId) => void choose(root, card, token, showId, twistMode),
     }, true);
   });
+  bindTrace(root, card.id, token, true);
+}
+
+function traceFields(open: boolean): string {
+  return `<form class="form" data-report>
+      <label for="trace">Factual trace</label>
+      <textarea id="trace" name="trace" maxlength="4000" placeholder="What happened, in order."></textarea>
+      <label for="remark">Remark, only if an event supports it</label>
+      <input id="remark" name="remark" type="text" maxlength="240" />
+      <label for="shot">Screenshot</label>
+      <input id="shot" name="shot" type="file" accept="image/png,image/jpeg,image/webp" />
+      <button class="ghost" type="submit">Save trace</button>
+      ${open ? `<button class="ghost" type="button" data-block>Record a blocker</button><button class="ghost" type="button" data-error>Record an error</button>` : ""}
+    </form>
+    <p class="note" data-report-status></p>`;
+}
+
+function bindTrace(root: HTMLElement, runId: string, token: string, open: boolean): void {
   root.querySelector("[data-report]")?.addEventListener("submit", (event) => {
     event.preventDefault();
     const form = event.currentTarget as HTMLFormElement;
@@ -130,7 +138,7 @@ function drawVariant(root: HTMLElement, card: FullRun, token: string, twistMode:
     const remark = String(data.get("remark") ?? "").trim();
     const shot = data.get("shot");
     void (async () => {
-      await api(`/api/runs/${card.id}/observations`, {
+      await api(`/api/runs/${runId}/observations`, {
         method: "POST",
         body: JSON.stringify({ trace, commentary: remark ? [{ text: remark }] : [] }),
       }, token);
@@ -139,7 +147,7 @@ function drawVariant(root: HTMLElement, card: FullRun, token: string, twistMode:
         upload.set("file", shot);
         upload.set("description", "Screenshot");
         upload.set("type", "screenshot");
-        await api(`/api/runs/${card.id}/artifacts`, { method: "POST", body: upload }, token);
+        await api(`/api/runs/${runId}/artifacts`, { method: "POST", body: upload }, token);
       }
       const status = root.querySelector("[data-report-status]");
       if (status) status.textContent = "Trace saved.";
@@ -148,10 +156,11 @@ function drawVariant(root: HTMLElement, card: FullRun, token: string, twistMode:
       if (status) status.textContent = error instanceof Error ? error.message : "Could not save the trace.";
     });
   });
+  if (!open) return;
   const finishAs = (outcome: "blocked" | "error") => {
     const reason = root.querySelector<HTMLTextAreaElement>("#trace")?.value.trim() || "Stopped before a choice.";
-    void api(`/api/runs/${card.id}/finish`, { method: "POST", body: JSON.stringify({ outcome, reason }) }, token)
-      .then(() => renderRun(root, card.id));
+    void api(`/api/runs/${runId}/finish`, { method: "POST", body: JSON.stringify({ outcome, reason }) }, token)
+      .then(() => renderRun(root, runId));
   };
   root.querySelector("[data-block]")?.addEventListener("click", () => finishAs("blocked"));
   root.querySelector("[data-error]")?.addEventListener("click", () => finishAs("error"));
